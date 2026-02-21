@@ -521,7 +521,7 @@ def _sidebar():
             else:
                 st.markdown('<span class="badge-n">⬤ Not assessed</span>', unsafe_allow_html=True)
             st.divider()
-            if st.button(t("logout_btn"), width='stretch'):
+            if st.button(t("logout_btn"), use_container_width=True):
                 ss["_confirm_logout"] = True
             if ss.get("_confirm_logout"):
                 st.warning(t("logout_confirm"))
@@ -587,7 +587,7 @@ if "user_key" not in ss:
         st.markdown('<div style="height:10px"></div>', unsafe_allow_html=True)
         go_col, _ = st.columns([1, 2])
         with go_col:
-            go = st.button(t("entry_btn"), type="primary", width='stretch')
+            go = st.button(t("entry_btn"), type="primary", use_container_width=True)
 
         if go:
             pn = normalize_phone(phone)
@@ -690,7 +690,7 @@ if ss.get("setup_step") in (1, 2):
             st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
             nc, _ = st.columns([1,2])
             with nc:
-                if st.button(t("wizard_next"), type="primary", width='stretch'):
+                if st.button(t("wizard_next"), type="primary", use_container_width=True):
                     if not name_v.strip(): st.error(t("name_error")); st.stop()
                     dn = d_en[d_disp.index(dtype_d)]
                     ss.update({"name":name_v.strip(),"age":int(age_v),"diabetes_type":dn,
@@ -708,10 +708,10 @@ if ss.get("setup_step") in (1, 2):
             st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
             bc, fc, _ = st.columns([1,1,1])
             with bc:
-                if st.button(t("wizard_back"), width='stretch'):
+                if st.button(t("wizard_back"), use_container_width=True):
                     ss["setup_step"] = 1; st.rerun()
             with fc:
-                if st.button(t("wizard_finish"), type="primary", width='stretch'):
+                if st.button(t("wizard_finish"), type="primary", use_container_width=True):
                     with st.spinner(t("wizard_saving")):
                         ss.update({"has_hypertension":hy,"has_high_cholesterol":ch,
                                    "on_insulin":ins,"hypo_episodes":hypo,"weakness_between":wkn,
@@ -787,7 +787,7 @@ with tabs[0]:
             f'</div>', unsafe_allow_html=True)
     with pc2:
         st.markdown('<div style="height:20px"></div>', unsafe_allow_html=True)
-        if st.button(t("edit_profile_btn"), width='stretch'):
+        if st.button(t("edit_profile_btn"), use_container_width=True):
             ss["editing_profile"] = not ss.get("editing_profile",False); st.rerun()
 
     if ss.get("editing_profile"):
@@ -826,7 +826,7 @@ with tabs[0]:
 
             adv_key = "show_adv_" + str(ss.get("user_key",""))[:8]
             if adv_key not in ss: ss[adv_key] = False
-            if st.button("➕ " + ("Add recent test results (optional)" if _lang()=="en" else "حالیہ ٹیسٹ کے نتائج شامل کریں"), key="adv_tog", width='content'):
+            if st.button("➕ " + ("Add recent test results (optional)" if _lang()=="en" else "حالیہ ٹیسٹ کے نتائج شامل کریں"), key="adv_tog", use_container_width=False):
                 ss[adv_key] = not ss[adv_key]; st.rerun()
             if ss.get(adv_key, False):
                 st.caption(t("pf_advanced_note"))
@@ -844,7 +844,7 @@ with tabs[0]:
 
             sv_c, _ = st.columns([1,2])
             with sv_c:
-                if st.button(t("save_profile_btn"), type="primary", width='stretch', key="sp"):
+                if st.button(t("save_profile_btn"), type="primary", use_container_width=True, key="sp"):
                     with st.spinner(t("saving_profile")):
                         gn = T["en"]["pf_gender_opts"][T[_lang()]["pf_gender_opts"].index(egn)]
                         dn = T["en"]["pf_diabetes_opts"][T[_lang()]["pf_diabetes_opts"].index(edt)]
@@ -888,7 +888,7 @@ with tabs[0]:
             unsafe_allow_html=True)
     with tb:
         st.markdown('<div style="height:16px"></div>', unsafe_allow_html=True)
-        if st.button(t("tip_new"), width='stretch', key="new_tip"):
+        if st.button(t("tip_new"), use_container_width=True, key="new_tip"):
             ss["current_tip"] = get_tip(_lang()); st.rerun()
 
     pp = _plan_profile()
@@ -946,7 +946,7 @@ with tabs[0]:
                 st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
                 sw_c, _ = st.columns([1, 3])
                 with sw_c:
-                    if st.button(t("swaps_btn"), key=f"sw_{day_num}", width='stretch'):
+                    if st.button(t("swaps_btn"), key=f"sw_{day_num}", use_container_width=True):
                         names = [day[s]["name"] for s in slots if s in day]
                         with st.spinner(t("getting_swaps")):
                             swaps = generate_swaps("; ".join(names))
@@ -964,14 +964,14 @@ with tabs[0]:
         if followed == t("yes_opt"):
             cb, _ = st.columns([1,3])
             with cb:
-                if st.button(t("save_ci_btn"), type="primary", width='stretch', key="ci_yes"):
+                if st.button(t("save_ci_btn"), type="primary", use_container_width=True, key="ci_yes"):
                     add_daily_checkin(user, ci_date, followed_plan=True, actual_meals="")
                     st.success(t("ci_saved")); st.balloons()
         else:
             actual = st.text_area(t("ate_label"), placeholder=t("ate_ph"), height=100, key="ci_ate")
             sb, _ = st.columns([1,3])
             with sb:
-                if st.button(t("save_suggest_btn"), type="primary", width='stretch', key="ci_no"):
+                if st.button(t("save_suggest_btn"), type="primary", use_container_width=True, key="ci_no"):
                     if not actual.strip(): st.warning(t("describe_ate"))
                     else:
                         with st.spinner(t("saving_suggest")):
@@ -1017,7 +1017,7 @@ with tabs[1]:
     if ss["chat_history"]:
         cl, _ = st.columns([1,4])
         with cl:
-            if st.button(t("chat_clear"), key="clr_chat", width='stretch'):
+            if st.button(t("chat_clear"), key="clr_chat", use_container_width=True):
                 ss["chat_history"] = []; st.rerun()
 
     st.caption(t("chat_note"))
@@ -1047,7 +1047,7 @@ with tabs[2]:
         sb, _ = st.columns([1,3])
         with sb:
             if st.button("Save Reading" if _lang()=="en" else "ریڈنگ محفوظ کریں",
-                         type="primary", width='stretch'):
+                         type="primary", use_container_width=True):
                 with st.spinner(t("saving_reading")):
                     add_glucose_log(user, datetime.combine(m_date, m_time), r_type, value, meal_note)
                 st.success(t("reading_saved"))
@@ -1073,7 +1073,7 @@ with tabs[3]:
             adh = (cdf["followed_plan"].sum()/len(cdf))*100
             st.metric(t("adh_metric"), f"{adh:.0f}%", delta=t("adh_delta").format(n=len(cdf)))
             st.dataframe(cdf[["date","followed_plan"]].rename(
-                columns={"date":t("col_date"),"followed_plan":t("col_fol")}), width='stretch')
+                columns={"date":t("col_date"),"followed_plan":t("col_fol")}), use_container_width=True)
         else: st.info(t("no_checkins"))
 
     with c2:
@@ -1114,6 +1114,6 @@ with tabs[3]:
         if ss.get("show_all_readings", False):
             st.dataframe(df.rename(columns={"measured_at":t("col_time"),"type":t("col_type"),
                                             "value":t("col_val"),"meal_note":t("col_note")}),
-                         width='stretch')
+                         use_container_width=True)
 
     st.markdown(f'<div class="footer">⚠️ {APP["disclaimer"]}</div>', unsafe_allow_html=True)
