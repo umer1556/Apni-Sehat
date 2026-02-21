@@ -36,12 +36,9 @@ from storage import (init_db, get_profile, upsert_profile,
                      add_daily_checkin, fetch_checkins)
 init_db()
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  CSS
-# ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
-/* ── Load both standard and newer Material Symbol fonts to prevent text fallback ── */
+/* ── Load Material Symbols font to prevent fallback text rendering ── */
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0');
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -63,106 +60,60 @@ st.markdown("""
     color-scheme: dark;
 }
 
-/* ═══ 1. Sidebar collapse button — FIXED (keeps button clickable) ═══ */
-
-/* Style the actual clickable button, not the wrapper */
+/* ═══ 1. Sidebar collapse button ═══ */
+/* ONLY style it — never hide children or override display,
+   that removes the clickable area and breaks Streamlit's JS handler */
 [data-testid="stSidebarCollapseButton"] button,
 [data-testid="collapsedControl"] button {
-    background: transparent !important;
-    border: none !important;
-    color: transparent !important;
-    font-size: 0 !important;              /* hides fallback icon text */
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    padding: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
+    background: var(--bg3) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+}
+[data-testid="stSidebarCollapseButton"] svg,
+[data-testid="collapsedControl"] svg {
+    fill: var(--txt2) !important;
 }
 
-/* Hide Streamlit’s built-in icon/text inside the button only */
-[data-testid="stSidebarCollapseButton"] button > *,
-[data-testid="collapsedControl"] button > * {
-    display: none !important;
+/* ═══ 2. Expander — fix "_arr" font-fallback text bleeding into label ═══ */
+/* The Material Symbols font sometimes fails to load; when it does the raw
+   ligature text ("_arrow_right_alt") bleeds over the expander label.
+   Fix: shrink the icon container to zero so no text can escape. */
+[data-testid="stExpanderToggleIcon"] {
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    opacity: 0 !important;
 }
-
-/* Draw custom arrows */
-[data-testid="stSidebarCollapseButton"] button::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    border-left: 2px solid var(--txt2);
-    border-bottom: 2px solid var(--txt2);
-    transform: rotate(45deg);
-    display: block;
-}
-
-[data-testid="collapsedControl"] button::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    border-right: 2px solid var(--txt2);
-    border-bottom: 2px solid var(--txt2);
-    transform: rotate(-45deg);
-    display: block;
-}
-
-
-/* ═══ 2. Expander arrow — FIXED (removes jumbled icon text) ═══ */
-
-/* Hide Streamlit’s native expander icon/fallback text safely */
-[data-testid="stExpander"] summary svg,
-[data-testid="stExpander"] summary .material-symbols-rounded,
-[data-testid="stExpander"] summary .material-icons,
-[data-testid="stExpander"] summary [aria-hidden="true"] {
-    display: none !important;
-}
-
-/* Make summary row clean and aligned */
+[data-testid="stExpanderToggleIcon"] * { display: none !important; }
+/* Summary row: flex so label sits left, chevron sits right */
 [data-testid="stExpander"] summary {
     display: flex !important;
     align-items: center !important;
     list-style: none !important;
-    gap: 8px !important;
 }
-
-[data-testid="stExpander"] summary::-webkit-details-marker {
-    display: none !important;
-}
-
-/* Custom arrow on the right */
-[data-testid="stExpander"] summary::after {
-    content: '';
-    width: 8px;
-    height: 8px;
-    border-right: 2px solid var(--green);
-    border-bottom: 2px solid var(--green);
-    transform: rotate(45deg);
-    transition: transform 0.2s ease;
-    margin-left: auto !important;
-    display: block !important;
-    flex-shrink: 0 !important;
-}
-
-/* Rotate when open (supports different Streamlit DOM versions) */
-[data-testid="stExpander"][open] summary::after,
-[data-testid="stExpander"] details[open] > summary::after {
-    transform: rotate(-135deg);
-    margin-top: 4px;
-}
-
-/* Keep label text clean */
+[data-testid="stExpander"] summary::-webkit-details-marker { display: none !important; }
 [data-testid="stExpander"] summary p {
     margin: 0 !important;
-    padding-right: 12px !important;
+    flex: 1 !important;
     color: var(--txt) !important;
     font-size: 0.95rem !important;
     font-weight: 600 !important;
 }
-
+/* CSS chevron — drawn via pseudo-element, pushed to right */
+[data-testid="stExpander"] summary::after {
+    content: '';
+    flex-shrink: 0;
+    width: 7px; height: 7px;
+    border-right: 2px solid var(--green);
+    border-bottom: 2px solid var(--green);
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+}
+[data-testid="stExpander"] details[open] summary::after {
+    transform: rotate(-135deg);
+    margin-top: 3px;
+}
 
 /* ═══ 3. Base ═══ */
 html, body { background:var(--bg) !important; font-family:'Inter',sans-serif !important; }
@@ -310,11 +261,8 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
 .stNumberInput button { background:var(--bg3) !important; color:var(--green) !important; border-color:var(--border) !important; }
 [data-testid="stSpinner"] p { color:var(--green) !important; }
 
-/* ════════════════════════════════════════
-   CUSTOM COMPONENTS
-   ════════════════════════════════════════ */
+/* ════════════ CUSTOM COMPONENTS ════════════ */
 
-/* ── BIG Login Hero ── */
 .login-hero { text-align:center; padding:48px 20px 32px; margin-bottom:4px; }
 .login-hero-logo {
     font-family:'Inter',sans-serif !important;
@@ -333,7 +281,6 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
     margin-top:12px !important; display:block !important; font-weight:400 !important;
 }
 
-/* ── Tip banner ── */
 .tip-banner {
     background:linear-gradient(135deg,#052e16,#0f3d1c);
     border:1px solid #16A34A; border-radius:14px;
@@ -348,7 +295,6 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
     margin-bottom:6px; display:block;
 }
 
-/* ── Profile card ── */
 .profile-card {
     background:var(--bg2); border:1px solid var(--border);
     border-left:4px solid var(--green); border-radius:12px;
@@ -357,13 +303,11 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
 .profile-name { font-size:1.1rem; font-weight:700; color:#F0FFF4 !important; }
 .profile-detail { font-size:0.88rem; color:var(--txt2) !important; margin-top:4px; }
 
-/* ── Badges ── */
 .badge-g { background:#052e16; color:#4ADE80 !important; border:1px solid #16A34A; border-radius:6px; padding:3px 12px; font-weight:700; font-size:0.82rem; display:inline-block; }
 .badge-a { background:#1c1000; color:#FCD34D !important; border:1px solid #F59E0B; border-radius:6px; padding:3px 12px; font-weight:700; font-size:0.82rem; display:inline-block; }
 .badge-r { background:#1a0505; color:#FCA5A5 !important; border:1px solid #EF4444; border-radius:6px; padding:3px 12px; font-weight:700; font-size:0.82rem; display:inline-block; }
 .badge-n { background:var(--bg3); color:var(--txt3) !important; border:1px solid var(--border); border-radius:6px; padding:3px 12px; font-weight:700; font-size:0.82rem; display:inline-block; }
 
-/* ── Chat bubbles ── */
 .bubble-user {
     background:#1a2e1a; border:1px solid #16A34A; border-radius:16px 16px 4px 16px;
     padding:14px 18px; margin:8px 0; margin-left:10%;
@@ -376,7 +320,6 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
 }
 .bubble-label { font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--txt3) !important; margin-bottom:4px; }
 
-/* ── Wizard box ── */
 .wizard-box {
     background:var(--bg2); border:1px solid var(--border);
     border-top:4px solid var(--green); border-radius:16px;
@@ -391,7 +334,6 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
     display:inline-block; margin-bottom:14px; letter-spacing:0.04em;
 }
 
-/* ── Feature card ── */
 .feature-card {
     background:var(--bg2); border:1px solid var(--border); border-radius:14px;
     padding:24px 26px; height:100%;
@@ -399,7 +341,6 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
 .feature-card p { color:var(--txt) !important; font-size:0.96rem !important; margin:8px 0 !important; }
 .feature-card .disc { color:var(--txt3) !important; font-size:0.83rem !important; }
 
-/* ── Sidebar disclaimer ── */
 .sb-disc {
     background:#110e00; border:1px solid #3a2800;
     border-left:3px solid var(--amber);
@@ -409,7 +350,6 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
 .sb-disc strong { color:#FCD34D !important; }
 .sb-disc-title { font-size:0.82rem !important; font-weight:700 !important; color:var(--amber) !important; margin-bottom:6px !important; }
 
-/* ── Meal slot / section labels ── */
 .meal-slot { font-size:0.82rem; font-weight:700; color:var(--green) !important; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:2px; }
 .section-label {
     font-size:0.72rem; font-weight:700; color:var(--txt3) !important;
@@ -417,70 +357,7 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
     border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:14px;
 }
 
-/* ── Footer ── */
 .footer { font-size:0.78rem; color:var(--txt3) !important; text-align:center; padding:12px 0; border-top:1px solid var(--border); margin-top:32px; }
-
-/* ── FINAL FIX: hide Streamlit icon ligature text (sidebar + expander) ── */
-
-/* 1) Sidebar collapsed/expanded control text like "double_arrow_right" */
-[data-testid="stSidebarCollapseButton"],
-[data-testid="collapsedControl"] {
-    font-size: 0 !important;      /* hides raw text nodes */
-    line-height: 0 !important;
-    color: transparent !important;
-}
-
-/* Keep actual button clickable, but hide built-in icon/text visually */
-[data-testid="stSidebarCollapseButton"] button,
-[data-testid="collapsedControl"] button {
-    font-size: 0 !important;
-    line-height: 0 !important;
-    color: transparent !important;
-    text-indent: -9999px !important;   /* extra safety for ligature text */
-    overflow: hidden !important;
-}
-
-/* Hide any fallback material icon text/svg inside */
-[data-testid="stSidebarCollapseButton"] .material-icons,
-[data-testid="stSidebarCollapseButton"] .material-symbols-rounded,
-[data-testid="collapsedControl"] .material-icons,
-[data-testid="collapsedControl"] .material-symbols-rounded,
-[data-testid="stSidebarCollapseButton"] svg,
-[data-testid="collapsedControl"] svg {
-    display: none !important;
-}
-
-
-/* 2) Expander header jumbled text like "_arr..." */
-[data-testid="stExpander"] summary {
-    font-size: 0 !important;      /* hides raw ligature text rendered by Streamlit */
-    line-height: 0 !important;
-}
-
-/* Remove native icon/fallbacks completely */
-[data-testid="stExpander"] summary svg,
-[data-testid="stExpander"] summary .material-icons,
-[data-testid="stExpander"] summary .material-symbols-rounded,
-[data-testid="stExpander"] summary [class*="material"] {
-    display: none !important;
-}
-
-/* If Streamlit injects a default pseudo-icon, kill it */
-[data-testid="stExpander"] summary::before {
-    content: none !important;
-    display: none !important;
-}
-
-/* Restore normal text size ONLY for the real expander label */
-[data-testid="stExpander"] summary p,
-[data-testid="stExpander"] summary [data-testid="stMarkdownContainer"],
-[data-testid="stExpander"] summary [data-testid="stMarkdownContainer"] * {
-    font-size: 0.95rem !important;
-    line-height: 1.3 !important;
-    color: var(--txt) !important;
-    font-weight: 600 !important;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -677,12 +554,10 @@ if "user_key" not in ss:
                         "profile_complete": True, "setup_step": "done",
                         "on_insulin": False, "hypo_episodes": False, "weakness_between": False,
                     })
-                    # Safe BMI — `or 0` converts NULL from DB to 0
                     h = prof.get("height_cm") or 0
                     w = prof.get("weight_kg") or 0
                     if h > 0 and w > 0:
                         ss["bmi"] = w / ((h / 100) ** 2)
-                    # Run triage so sidebar badge shows for returning users
                     _run_triage(
                         ss.get("diabetes_type", "Type 2"),
                         ss.get("has_hypertension", False),
