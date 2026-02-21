@@ -867,9 +867,6 @@ if not ss.get("week_plan"):
             bmi=ss.get("bmi"), diabetes_type=ss.get("diabetes_type","Type 2"))
 
 
-# Late CSS injection — appears after Streamlit's own styles in DOM, guaranteed to win
-
-
 tabs = st.tabs([t("tab_plan"), t("tab_chat"), t("tab_glucose"), t("tab_dashboard")])
 
 
@@ -936,6 +933,10 @@ with tabs[0]:
 
             adv_key = "show_adv_" + str(ss.get("user_key",""))[:8]
             if adv_key not in ss: ss[adv_key] = False
+
+            # ── FIX: default values so save handler can always reference these ──
+            ebps, ebpd, ea1c, etc, ef1, ef2, ef3 = 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0
+
             if st.button("➕ " + ("Add recent test results (optional)" if _lang()=="en" else "حالیہ ٹیسٹ کے نتائج شامل کریں"), key="adv_tog", use_container_width=False):
                 ss[adv_key] = not ss[adv_key]; st.rerun()
             if ss.get(adv_key, False):
