@@ -678,60 +678,170 @@ if ss.get("setup_step") in (1, 2):
         )
         st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
 
+        # ── STEP 1: Name, age, gender, height, weight, diabetes type, food prefs ──
         if step == 1:
             name_v  = st.text_input(t("wizard_name"), value=ss.get("name",""))
-            age_v   = st.number_input(t("wizard_age"), 1, 110, int(ss.get("age",50)))
-            d_disp  = t("wizard_diabetes_opts"); d_en = T["en"]["wizard_diabetes_opts"]
-            saved   = ss.get("diabetes_type","Type 2")
-            d_idx   = d_en.index(saved) if saved in d_en else 0
-            dtype_d = st.selectbox(t("wizard_diabetes"), d_disp, index=d_idx)
-            pref    = st.checkbox(t("wizard_desi"), value=ss.get("prefer_desi",True))
-            veg     = st.checkbox(t("wizard_veg"),  value=ss.get("veg_only",False))
+            col_age, col_gen = st.columns(2)
+            with col_age:
+                age_v = st.number_input(t("wizard_age"), 1, 110, int(ss.get("age", 50)))
+            with col_gen:
+                gender_opts = ["Prefer not to say", "Male", "Female", "Other"]
+                saved_g     = ss.get("gender", "Prefer not to say")
+                g_idx       = gender_opts.index(saved_g) if saved_g in gender_opts else 0
+                gender_v    = st.selectbox("Gender", gender_opts, index=g_idx)
+
+            st.markdown("**Height**")
+            col_ft, col_in = st.columns(2)
+            with col_ft:
+                height_ft = st.number_input("Feet", 0, 8,
+                    int(ss.get("height_ft", 5)), key="wiz_ft")
+            with col_in:
+                height_in = st.number_input("Inches", 0, 11,
+                    int(ss.get("height_in", 6)), key="wiz_in")
+            height_cm_calc = round((height_ft * 12 + height_in) * 2.54)
+
+            weight_kg_v = st.number_input("Weight (kg)", 20.0, 400.0,
+                float(ss.get("weight_kg", 70.0) or 70.0), 0.5, key="wiz_wt")
+
+            bmi_v = None
+            if height_cm_calc > 0 and weight_kg_v > 0:
+                bmi_v = round(weight_kg_v / ((height_cm_calc / 100) ** 2), 1)
+                st.caption(f"📏 Your BMI: **{bmi_v}** (estimated)")
+
+            st.divider()
+
+            # Diabetes type with "Not sure" warning
+            d_opts  = ["Type 1", "Type 2", "Not sure / not diagnosed"]
+            saved_d = ss.get("diabetes_type", "Type 2")
+            d_idx   = d_opts.index(saved_d) if saved_d in d_opts else 1
+            dtype_d = st.selectbox("Do you have diabetes?", d_opts, index=d_idx)
+
+            if dtype_d == "Not sure / not diagnosed":
+                st.warning(
+                    "⚠️ **Please get checked.** Undiagnosed diabetes is common and manageable "
+                    "when caught early. Visit your doctor or a nearby clinic for a simple fasting "
+                    "blood sugar test — it takes just a few minutes and could make a big difference. "
+                    "We will treat your plan cautiously until you know for sure."
+                )
+
+            st.divider()
+            pref = st.checkbox(t("wizard_desi"), value=ss.get("prefer_desi", True))
+            veg  = st.checkbox(t("wizard_veg"),  value=ss.get("veg_only",    False))
+
             st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
-            nc, _ = st.columns([1,2])
+            nc, _ = st.columns([1, 2])
             with nc:
                 if st.button(t("wizard_next"), type="primary", use_container_width=True):
-                    if not name_v.strip(): st.error(t("name_error")); st.stop()
-                    dn = d_en[d_disp.index(dtype_d)]
-                    ss.update({"name":name_v.strip(),"age":int(age_v),"diabetes_type":dn,
-                               "prefer_desi":pref,"veg_only":veg,"setup_step":2})
+                    if not name_v.strip():
+                        st.error(t("name_error")); st.stop()
+                    ss.update({
+                        "name":        name_v.strip(),
+                        "age":         int(age_v),
+                        "gender":      gender_v,
+                        "height_ft":   int(height_ft),
+                        "height_in":   int(height_in),
+                        "height_cm":   height_cm_calc,
+                        "weight_kg":   float(weight_kg_v),
+                        "bmi":         bmi_v,
+                        "diabetes_type": dtype_d,
+                        "prefer_desi": pref,
+                        "veg_only":    veg,
+                        "setup_step":  2,
+                    })
                     st.rerun()
+
+        # ── STEP 2: Conditions, meal habits ──────────────────────────────────────
         else:
-            hy    = st.checkbox(t("wizard_hypert"), value=ss.get("has_hypertension",False))
-            ch    = st.checkbox(t("wizard_chol"),   value=ss.get("has_high_cholesterol",False))
-            other = st.checkbox(t("wizard_other"))
+            st.markdown("### Do you have any of the following conditions?")
+            st.caption("Tick all that apply. If you have none, leave all unticked and click Finish.")
+
+            hy_q    = st.radio("High blood pressure (hypertension)?",
+                               ["No", "Yes", "Not sure"],
+                               index=["No","Yes","Not sure"].index(ss.get("hy_ans","No")),
+                               horizontal=True, key="wiz_hy")
+            ch_q    = st.radio("High cholesterol?",
+                               ["No", "Yes", "Not sure"],
+                               index=["No","Yes","Not sure"].index(ss.get("ch_ans","No")),
+                               horizontal=True, key="wiz_ch")
+            other_q = st.radio("Other major conditions? (kidney disease, heart disease, pregnancy, etc.)",
+                               ["No", "Yes"],
+                               index=["No","Yes"].index(ss.get("other_ans","No")),
+                               horizontal=True, key="wiz_ot")
+
+            hy    = (hy_q    == "Yes")
+            ch    = (ch_q    == "Yes")
+            other = (other_q == "Yes")
+            hy_ns = (hy_q    == "Not sure")
+            ch_ns = (ch_q    == "Not sure")
+
+            if hy_ns:
+                st.info("💡 If you're unsure about blood pressure, ask your doctor or pharmacist — many clinics offer free checks.")
+            if ch_ns:
+                st.info("💡 A simple lipid panel blood test will tell you your cholesterol levels. Worth asking your doctor.")
+
             st.divider()
-            st.markdown(f"**{'Meal frequency questions' if _lang()=='en' else 'کھانے کی تعداد کے سوالات'}**")
-            ins  = st.checkbox(t("q_insulin"),  value=ss.get("on_insulin",False),       help=t("q_insulin_help"))
-            hypo = st.checkbox(t("q_hypo"),     value=ss.get("hypo_episodes",False),    help=t("q_hypo_help"))
+            st.markdown("**A few more questions about your daily routine:**")
+            ins  = st.checkbox(t("q_insulin"),  value=ss.get("on_insulin",  False), help=t("q_insulin_help"))
+            hypo = st.checkbox(t("q_hypo"),     value=ss.get("hypo_episodes",False), help=t("q_hypo_help"))
             wkn  = st.checkbox(t("q_weakness"), value=ss.get("weakness_between",False), help=t("q_weakness_help"))
+
             st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
-            bc, fc, _ = st.columns([1,1,1])
+            bc, fc, _ = st.columns([1, 1, 1])
             with bc:
                 if st.button(t("wizard_back"), use_container_width=True):
                     ss["setup_step"] = 1; st.rerun()
             with fc:
                 if st.button(t("wizard_finish"), type="primary", use_container_width=True):
                     with st.spinner(t("wizard_saving")):
-                        ss.update({"has_hypertension":hy,"has_high_cholesterol":ch,
-                                   "on_insulin":ins,"hypo_episodes":hypo,"weakness_between":wkn,
-                                   "gender":"Prefer not to say","height_cm":0,"weight_kg":0.0,
-                                   "family_history":[],"bmi":None})
-                        _run_triage(ss["diabetes_type"],hy,ch,other_major=other)
-                        upsert_profile(ss["user_key"],{
-                            "full_name":ss["name"],"phone_last4":ss.get("phone_last4"),
-                            "age":ss["age"],"gender":"Prefer not to say",
-                            "diabetes_type":ss["diabetes_type"],
-                            "has_hypertension":1 if hy else 0,
-                            "has_high_cholesterol":1 if ch else 0,"family_history":[],
+                        dtype = ss.get("diabetes_type", "Type 2")
+
+                        # "Not sure" diabetes → force AMBER + disclaimer flag
+                        if dtype == "Not sure / not diagnosed":
+                            ss["triage_level"] = "AMBER"
+                            ss["triage_flags"] = [
+                                "Diabetes status unconfirmed — please get a fasting blood sugar test.",
+                                "Following a cautious low-GI plan until diagnosis is confirmed.",
+                            ]
+                        else:
+                            # Treat "Not sure" on BP/cholesterol conservatively (assume yes for safety)
+                            _run_triage(dtype, hy or hy_ns, ch or ch_ns,
+                                        other_major=other)
+
+                        ss.update({
+                            "has_hypertension":     hy or hy_ns,
+                            "has_high_cholesterol": ch or ch_ns,
+                            "hy_ans":    hy_q,
+                            "ch_ans":    ch_q,
+                            "other_ans": other_q,
+                            "on_insulin":       ins,
+                            "hypo_episodes":    hypo,
+                            "weakness_between": wkn,
+                            "family_history":   [],
+                        })
+                        upsert_profile(ss["user_key"], {
+                            "full_name":    ss["name"],
+                            "phone_last4":  ss.get("phone_last4"),
+                            "age":          ss["age"],
+                            "gender":       ss.get("gender","Prefer not to say"),
+                            "height_cm":    ss.get("height_cm", 0),
+                            "weight_kg":    ss.get("weight_kg", 0.0),
+                            "family_history": [],
+                            "diabetes_type":        dtype,
+                            "has_hypertension":     1 if (hy or hy_ns) else 0,
+                            "has_high_cholesterol": 1 if (ch or ch_ns) else 0,
                         })
                         ss["week_plan"] = generate_week_plan(
-                            prefer_desi=ss.get("prefer_desi",True),
-                            veg_only=ss.get("veg_only",False),
-                            has_hypertension=hy,has_high_cholesterol=ch,
-                            on_insulin=ins,hypo_episodes=hypo,weakness_between=wkn,
-                            bmi=ss.get("bmi"),diabetes_type=ss["diabetes_type"])
-                        ss["profile_complete"] = True; ss["setup_step"] = "done"
+                            prefer_desi=ss.get("prefer_desi", True),
+                            veg_only=ss.get("veg_only", False),
+                            has_hypertension=hy or hy_ns,
+                            has_high_cholesterol=ch or ch_ns,
+                            on_insulin=ins, hypo_episodes=hypo,
+                            weakness_between=wkn,
+                            bmi=ss.get("bmi"),
+                            diabetes_type=dtype,
+                        )
+                        ss["profile_complete"] = True
+                        ss["setup_step"] = "done"
                     st.success(t("wizard_done_msg")); st.rerun()
     st.stop()
 
