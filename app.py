@@ -40,9 +40,6 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 
-/* ══════════════════════════════════════════
-   DARK MODE TOKENS (default)
-══════════════════════════════════════════ */
 :root {
     --bg:      #0d1117;
     --bg2:     #161b22;
@@ -61,9 +58,6 @@ st.markdown("""
     color-scheme: dark light;
 }
 
-/* ══════════════════════════════════════════
-   LIGHT MODE TOKENS
-══════════════════════════════════════════ */
 @media (prefers-color-scheme: light) {
     :root {
         --bg:      #ffffff;
@@ -84,284 +78,107 @@ st.markdown("""
     }
 }
 
-/* ── Base ── */
-html {
-    color-scheme: dark light;
-}
-html, body,
-.stApp,
+html { color-scheme: dark light; }
+html, body, .stApp,
 [data-testid="stAppViewContainer"],
 [data-testid="stAppViewBlockContainer"],
 [data-testid="block-container"],
-div.block-container,
-.main {
+div.block-container, .main {
     background: var(--bg) !important;
     font-family: 'Inter', sans-serif !important;
     color: var(--txt) !important;
 }
 
-/* ── Chat input ── */
 [data-testid="stChatInput"],
 [data-testid="stChatInputContainer"],
 [data-testid="stChatInputContainer"] > div,
 [data-testid="stChatInputContainer"] textarea {
-    background: var(--bg3) !important;
-    color: var(--txt) !important;
-    border-color: var(--border) !important;
+    background: var(--bg3) !important; color: var(--txt) !important; border-color: var(--border) !important;
 }
-[data-testid="stChatInputContainer"] textarea::placeholder {
-    color: var(--txt3) !important;
-    opacity: 1 !important;
-}
-[data-testid="stChatInputContainer"] button {
-    background: var(--green2) !important;
-    color: #fff !important;
-    border: none !important;
-}
-[data-testid="stBottom"],
-[data-testid="stBottom"] > div {
-    background: var(--bg) !important;
-    border-top: 1px solid var(--border) !important;
+[data-testid="stChatInputContainer"] textarea::placeholder { color: var(--txt3) !important; opacity: 1 !important; }
+[data-testid="stChatInputContainer"] button { background: var(--green2) !important; color: #fff !important; border: none !important; }
+[data-testid="stBottom"], [data-testid="stBottom"] > div { background: var(--bg) !important; border-top: 1px solid var(--border) !important; }
+
+[data-testid="stSidebar"], [data-testid="stSidebar"] > div, [data-testid="stSidebarContent"] {
+    background: var(--bg2) !important; border-right: 1px solid var(--border) !important;
 }
 
-/* ── Sidebar ── */
-[data-testid="stSidebar"],
-[data-testid="stSidebar"] > div,
-[data-testid="stSidebarContent"] {
-    background: var(--bg2) !important;
-    border-right: 1px solid var(--border) !important;
+[data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] li,
+[data-testid="stCaptionContainer"] p, [data-testid="stSidebar"] p,
+[data-testid="stSidebar"] li, [data-testid="stSidebar"] label {
+    font-family: 'Inter', sans-serif !important; color: var(--txt) !important;
 }
-
-/* ── Typography ── */
-[data-testid="stMarkdownContainer"] p,
-[data-testid="stMarkdownContainer"] li,
-[data-testid="stCaptionContainer"] p,
-[data-testid="stSidebar"] p,
-[data-testid="stSidebar"] li,
-[data-testid="stSidebar"] label {
-    font-family: 'Inter', sans-serif !important;
-    color: var(--txt) !important;
-}
-[data-testid="stMarkdownContainer"] p,
-[data-testid="stSidebar"] p        { font-size: 1.08rem !important; line-height: 1.85 !important; }
+[data-testid="stMarkdownContainer"] p, [data-testid="stSidebar"] p { font-size: 1.08rem !important; line-height: 1.85 !important; }
 [data-testid="stCaptionContainer"] p { font-size: 0.95rem !important; color: var(--txt3) !important; line-height: 1.75 !important; }
 [data-testid="stMarkdownContainer"] h1 { font-size: 2.3rem !important; font-weight: 800 !important; color: var(--green) !important; letter-spacing: -0.5px !important; }
 [data-testid="stMarkdownContainer"] h2 { font-size: 1.55rem !important; font-weight: 700 !important; color: var(--green) !important; }
 [data-testid="stMarkdownContainer"] h3 { font-size: 1.25rem !important; font-weight: 700 !important; color: var(--txt) !important; }
 
-/* ── Tabs ── */
-.stTabs [data-baseweb="tab-list"] {
-    background: var(--bg2) !important;
-    border-bottom: 1px solid var(--border) !important;
-    gap: 0 !important;
+.stTabs [data-baseweb="tab-list"] { background: var(--bg2) !important; border-bottom: 1px solid var(--border) !important; gap: 0 !important; }
+.stTabs [data-baseweb="tab"] { background: transparent !important; color: var(--txt2) !important; font-family: 'Inter', sans-serif !important; font-size: 1rem !important; font-weight: 600 !important; padding: 12px 20px !important; border-bottom: 2px solid transparent !important; min-height: 48px !important; }
+.stTabs [aria-selected="true"] { color: var(--green) !important; border-bottom-color: var(--green) !important; }
+.stTabs [data-baseweb="tab-panel"] { background: var(--bg) !important; padding-top: 24px !important; }
+
+.stButton > button { font-family: 'Inter', sans-serif !important; font-size: 1.05rem !important; font-weight: 600 !important; border-radius: 6px !important; min-height: 46px !important; padding: 0.6rem 1.3rem !important; transition: all 0.15s ease !important; background: var(--bg3) !important; color: var(--txt) !important; border: 1px solid var(--border) !important; }
+.stButton > button:hover { background: var(--bg2) !important; border-color: var(--green) !important; color: var(--green) !important; }
+.stButton > button[kind="primary"] { background: var(--green2) !important; color: #fff !important; border: none !important; font-weight: 700 !important; }
+.stButton > button[kind="primary"]:hover { background: var(--green) !important; transform: translateY(-1px) !important; box-shadow: 0 4px 14px var(--green-t) !important; }
+
+[data-baseweb="input"] input, [data-baseweb="textarea"] textarea,
+.stTextInput input, .stNumberInput input, .stTextArea textarea {
+    background: var(--bg3) !important; color: var(--txt) !important;
+    border: 1px solid var(--border) !important; border-radius: 6px !important;
+    font-family: 'Inter', sans-serif !important; font-size: 1.05rem !important;
 }
-.stTabs [data-baseweb="tab"] {
-    background: transparent !important;
-    color: var(--txt2) !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 1rem !important;
-    font-weight: 600 !important;
-    padding: 12px 20px !important;
-    border-bottom: 2px solid transparent !important;
-    min-height: 48px !important;
-}
-.stTabs [aria-selected="true"] {
-    color: var(--green) !important;
-    border-bottom-color: var(--green) !important;
-}
-.stTabs [data-baseweb="tab-panel"] {
-    background: var(--bg) !important;
-    padding-top: 24px !important;
+[data-baseweb="input"] input:focus, [data-baseweb="textarea"] textarea:focus { border-color: var(--green) !important; box-shadow: 0 0 0 3px var(--green-t) !important; }
+
+.stTextInput label, .stNumberInput label, .stTextArea label, .stSelectbox label,
+.stDateInput label, .stTimeInput label, .stRadio legend, .stCheckbox label,
+.stToggle label, .stMultiSelect label {
+    color: var(--txt2) !important; font-size: 0.9rem !important; font-weight: 600 !important;
+    letter-spacing: 0.04em !important; text-transform: uppercase !important;
 }
 
-/* ── Buttons ── */
-.stButton > button {
-    font-family: 'Inter', sans-serif !important;
-    font-size: 1.05rem !important;
-    font-weight: 600 !important;
-    border-radius: 6px !important;
-    min-height: 46px !important;
-    padding: 0.6rem 1.3rem !important;
-    transition: all 0.15s ease !important;
-    background: var(--bg3) !important;
-    color: var(--txt) !important;
-    border: 1px solid var(--border) !important;
-}
-.stButton > button:hover {
-    background: var(--bg2) !important;
-    border-color: var(--green) !important;
-    color: var(--green) !important;
-}
-.stButton > button[kind="primary"] {
-    background: var(--green2) !important;
-    color: #fff !important;
-    border: none !important;
-    font-weight: 700 !important;
-}
-.stButton > button[kind="primary"]:hover {
-    background: var(--green) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 14px var(--green-t) !important;
-}
-
-/* ── Inputs ── */
-[data-baseweb="input"] input,
-[data-baseweb="textarea"] textarea,
-.stTextInput input,
-.stNumberInput input,
-.stTextArea textarea {
-    background: var(--bg3) !important;
-    color: var(--txt) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 6px !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 1.05rem !important;
-}
-[data-baseweb="input"] input:focus,
-[data-baseweb="textarea"] textarea:focus {
-    border-color: var(--green) !important;
-    box-shadow: 0 0 0 3px var(--green-t) !important;
-}
-
-/* ── Labels ── */
-.stTextInput label, .stNumberInput label, .stTextArea label,
-.stSelectbox label, .stDateInput label, .stTimeInput label,
-.stRadio legend, .stCheckbox label, .stToggle label, .stMultiSelect label {
-    color: var(--txt2) !important;
-    font-size: 0.9rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.04em !important;
-    text-transform: uppercase !important;
-}
-
-/* ── Selectbox ── */
-[data-baseweb="select"] > div {
-    background: var(--bg3) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 6px !important;
-    color: var(--txt) !important;
-}
-[data-baseweb="popover"] [role="listbox"],
-[data-baseweb="menu"] {
-    background: var(--bg2) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 6px !important;
-}
+[data-baseweb="select"] > div { background: var(--bg3) !important; border: 1px solid var(--border) !important; border-radius: 6px !important; color: var(--txt) !important; }
+[data-baseweb="popover"] [role="listbox"], [data-baseweb="menu"] { background: var(--bg2) !important; border: 1px solid var(--border) !important; border-radius: 6px !important; }
 [data-baseweb="menu"] li { color: var(--txt) !important; font-size: 1.05rem !important; }
 [data-baseweb="menu"] li:hover { background: var(--bg3) !important; }
 
-/* ── Radio / Checkbox / Toggle ── */
-.stRadio [role="radiogroup"] label,
-.stCheckbox label,
-.stToggle label {
-    color: var(--txt) !important;
-    font-size: 1.05rem !important;
-    font-weight: 400 !important;
-    text-transform: none !important;
-    letter-spacing: 0 !important;
+.stRadio [role="radiogroup"] label, .stCheckbox label, .stToggle label {
+    color: var(--txt) !important; font-size: 1.05rem !important;
+    font-weight: 400 !important; text-transform: none !important; letter-spacing: 0 !important;
 }
 
-/* ── Metrics ── */
-[data-testid="stMetric"] {
-    background: var(--bg2) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    padding: 16px 20px !important;
-}
-[data-testid="stMetricValue"] {
-    font-family: 'Inter', sans-serif !important;
-    font-size: 2rem !important;
-    font-weight: 800 !important;
-    color: var(--green) !important;
-}
-[data-testid="stMetricLabel"] {
-    font-family: 'Inter', sans-serif !important;
-    color: var(--txt2) !important;
-    font-size: 0.88rem !important;
-    font-weight: 600 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-}
+[data-testid="stMetric"] { background: var(--bg2) !important; border: 1px solid var(--border) !important; border-radius: 8px !important; padding: 16px 20px !important; }
+[data-testid="stMetricValue"] { font-family: 'Inter', sans-serif !important; font-size: 2rem !important; font-weight: 800 !important; color: var(--green) !important; }
+[data-testid="stMetricLabel"] { font-family: 'Inter', sans-serif !important; color: var(--txt2) !important; font-size: 0.88rem !important; font-weight: 600 !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; }
 
-/* ── Alerts ── */
 [data-testid="stSuccess"] { background: var(--green-t) !important; border-left: 3px solid var(--green) !important; border-radius: 6px !important; }
-[data-testid="stInfo"]    { background: rgba(88,166,255,0.1) !important; border-left: 3px solid var(--blue) !important;  border-radius: 6px !important; }
+[data-testid="stInfo"]    { background: rgba(88,166,255,0.1) !important; border-left: 3px solid var(--blue) !important; border-radius: 6px !important; }
 [data-testid="stWarning"] { background: rgba(210,153,34,0.1) !important; border-left: 3px solid var(--amber) !important; border-radius: 6px !important; }
-[data-testid="stError"]   { background: rgba(248,81,73,0.1) !important;  border-left: 3px solid var(--red) !important;   border-radius: 6px !important; }
+[data-testid="stError"]   { background: rgba(248,81,73,0.1) !important; border-left: 3px solid var(--red) !important; border-radius: 6px !important; }
 [data-testid="stSuccess"] p, [data-testid="stSuccess"] li { color: var(--txt) !important; }
 [data-testid="stInfo"]    p, [data-testid="stInfo"]    li { color: var(--txt) !important; }
 [data-testid="stWarning"] p, [data-testid="stWarning"] li { color: var(--txt) !important; }
 [data-testid="stError"]   p, [data-testid="stError"]   li { color: var(--txt) !important; }
 
-/* ── Expander ── */
-[data-testid="stExpander"] {
-    background: var(--bg2) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-}
+[data-testid="stExpander"] { background: var(--bg2) !important; border: 1px solid var(--border) !important; border-radius: 8px !important; }
 [data-testid="stExpander"] summary { padding: 12px 16px !important; }
 [data-testid="stExpander"] summary:hover { background: var(--bg3) !important; border-radius: 8px !important; }
 [data-testid="stExpander"] > div > div { background: var(--bg2) !important; padding: 12px 16px !important; }
 
-/* ── Dataframe ── */
-[data-testid="stDataFrame"] {
-    background: var(--bg2) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-}
+[data-testid="stDataFrame"] { background: var(--bg2) !important; border: 1px solid var(--border) !important; border-radius: 8px !important; }
 
-/* ── Date / Time / Number steppers ── */
-input[type="date"], input[type="time"] {
-    background: var(--bg3) !important;
-    color: var(--txt) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 6px !important;
-}
-.stNumberInput button {
-    background: var(--bg3) !important;
-    border-color: var(--border) !important;
-    color: var(--txt2) !important;
-}
+input[type="date"], input[type="time"] { background: var(--bg3) !important; color: var(--txt) !important; border: 1px solid var(--border) !important; border-radius: 6px !important; }
+.stNumberInput button { background: var(--bg3) !important; border-color: var(--border) !important; color: var(--txt2) !important; }
 
-/* ── Misc ── */
 hr { border-color: var(--border) !important; }
 [data-testid="stSpinner"] p { color: var(--green) !important; }
 [data-baseweb="tag"] { background: var(--green-t) !important; color: var(--green) !important; }
 
-/* ══════════════════════════════════════════
-   CUSTOM COMPONENTS
-══════════════════════════════════════════ */
-
-.tip-banner {
-    background: var(--green-t);
-    border: 1px solid var(--green2);
-    border-radius: 10px;
-    padding: 16px 20px;
-    margin-bottom: 18px;
-    font-family: 'Inter', sans-serif;
-    font-size: 1.08rem;
-    line-height: 1.85;
-    color: var(--txt);
-}
-.tip-label {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--green);
-    margin-bottom: 6px;
-    display: block;
-}
-.profile-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--green);
-    border-radius: 8px;
-    padding: 14px 20px;
-    margin-bottom: 16px;
-    font-family: 'Inter', sans-serif;
-}
+.tip-banner { background: var(--green-t); border: 1px solid var(--green2); border-radius: 10px; padding: 16px 20px; margin-bottom: 18px; font-family: 'Inter', sans-serif; font-size: 1.08rem; line-height: 1.85; color: var(--txt); }
+.tip-label { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green); margin-bottom: 6px; display: block; }
+.profile-card { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 8px; padding: 14px 20px; margin-bottom: 16px; font-family: 'Inter', sans-serif; }
 .profile-name   { font-size: 1.2rem;  font-weight: 700; color: var(--txt);  }
 .profile-detail { font-size: 0.98rem; color: var(--txt2); margin-top: 3px;  }
 
@@ -370,49 +187,17 @@ hr { border-color: var(--border) !important; }
 .badge-r { background: rgba(248,81,73,0.1);  color: var(--red);    border: 1px solid var(--red);    border-radius: 5px; padding: 2px 10px; font-weight: 700; font-size: 0.9rem; display: inline-block; font-family: 'Inter', sans-serif; }
 .badge-n { background: var(--bg3);           color: var(--txt3);   border: 1px solid var(--border); border-radius: 5px; padding: 2px 10px; font-weight: 700; font-size: 0.9rem; display: inline-block; font-family: 'Inter', sans-serif; }
 
-.bubble-user {
-    background: var(--green-t);
-    border: 1px solid var(--green2);
-    border-radius: 12px 12px 3px 12px;
-    padding: 12px 16px; margin: 6px 0; margin-left: 8%;
-    font-family: 'Inter', sans-serif; font-size: 1.05rem; line-height: 1.85; color: var(--txt);
-}
-.bubble-bot {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px 12px 12px 3px;
-    padding: 12px 16px; margin: 6px 0; margin-right: 8%;
-    font-family: 'Inter', sans-serif; font-size: 1.05rem; line-height: 1.85; color: var(--txt);
-}
+.bubble-user { background: var(--green-t); border: 1px solid var(--green2); border-radius: 12px 12px 3px 12px; padding: 12px 16px; margin: 6px 0; margin-left: 8%; font-family: 'Inter', sans-serif; font-size: 1.05rem; line-height: 1.85; color: var(--txt); }
+.bubble-bot  { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px 12px 12px 3px; padding: 12px 16px; margin: 6px 0; margin-right: 8%; font-family: 'Inter', sans-serif; font-size: 1.05rem; line-height: 1.85; color: var(--txt); }
 .bubble-label { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--txt3); margin-bottom: 3px; }
 
-.wizard-box {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-top: 3px solid var(--green); border-radius: 10px;
-    padding: 28px 32px; margin: 0 auto; max-width: 560px;
-    font-family: 'Inter', sans-serif;
-}
-.step-pill {
-    background: var(--green-t); color: var(--green); border: 1px solid var(--green2);
-    border-radius: 20px; padding: 3px 12px; font-size: 0.73rem; font-weight: 700;
-    display: inline-block; margin-bottom: 12px; font-family: 'Inter', sans-serif;
-}
-.feature-card {
-    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
-    padding: 22px 24px; height: 100%; font-family: 'Inter', sans-serif;
-}
-.sb-disc {
-    background: rgba(210,153,34,0.08); border: 1px solid var(--amber);
-    border-left: 3px solid var(--amber); border-radius: 6px;
-    padding: 10px 12px; margin-top: 4px; font-family: 'Inter', sans-serif;
-}
+.wizard-box { background: var(--bg2); border: 1px solid var(--border); border-top: 3px solid var(--green); border-radius: 10px; padding: 28px 32px; margin: 0 auto; max-width: 560px; font-family: 'Inter', sans-serif; }
+.step-pill { background: var(--green-t); color: var(--green); border: 1px solid var(--green2); border-radius: 20px; padding: 3px 12px; font-size: 0.73rem; font-weight: 700; display: inline-block; margin-bottom: 12px; font-family: 'Inter', sans-serif; }
+.feature-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 22px 24px; height: 100%; font-family: 'Inter', sans-serif; }
+.sb-disc { background: rgba(210,153,34,0.08); border: 1px solid var(--amber); border-left: 3px solid var(--amber); border-radius: 6px; padding: 10px 12px; margin-top: 4px; font-family: 'Inter', sans-serif; }
 .sb-disc-title { font-size: 0.92rem; font-weight: 700; color: var(--amber); margin-bottom: 4px; font-family: 'Inter', sans-serif; }
 .meal-slot { font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
-.section-label {
-    font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--txt3);
-    text-transform: uppercase; letter-spacing: 0.1em;
-    border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 12px;
-}
+.section-label { font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 12px; }
 .login-hero { text-align: center; padding: 48px 20px 28px; }
 .login-hero-logo { font-family: 'Inter', sans-serif; font-size: 4rem; font-weight: 900; color: var(--green); letter-spacing: -2px; line-height: 1; display: block; }
 .login-hero-urdu { font-size: 2.2rem; color: var(--green); font-weight: 700; display: block; margin-top: 4px; }
@@ -447,6 +232,17 @@ def _lang_toggle(suffix=""):
         ss["_lc"]  = ss.get("_lc", 0) + 1
         ss["current_tip"] = get_tip(_lang())
         st.rerun()
+
+# ── FIX 1 helper: convert stored cm back to ft/in for display ──
+def _cm_to_ft_in(cm):
+    if not cm or cm <= 0:
+        return 5, 6
+    total_in = cm / 2.54
+    ft = int(total_in // 12)
+    inch = int(round(total_in % 12))
+    if inch == 12:
+        ft += 1; inch = 0
+    return ft, inch
 
 def _profile_context():
     p = []
@@ -499,10 +295,6 @@ SLOT_CFG = {
 # ══════════════════════════════════════════════════════════════════════════════
 #  SIDEBAR
 # ══════════════════════════════════════════════════════════════════════════════
-def _sidebar():
-    pass
-
-
 def _sidebar():
     with st.sidebar:
         _lang_toggle("sb")
@@ -603,25 +395,31 @@ if "user_key" not in ss:
                 except: st.error(t("db_error")); st.stop()
 
                 if prof and prof.get("age"):
+                    h_cm = prof.get("height_cm", 0) or 0
+                    h_ft, h_in = _cm_to_ft_in(h_cm)
                     ss.update({
                         "name": prof.get("full_name") or name.strip(),
                         "age": prof.get("age", 30),
                         "gender": prof.get("gender", "Prefer not to say"),
-                        "height_cm": prof.get("height_cm", 0),
+                        "height_cm": h_cm,
+                        "height_ft": h_ft,
+                        "height_in": h_in,
                         "weight_kg": prof.get("weight_kg", 0.0),
                         "family_history": prof.get("family_history", []),
                         "diabetes_type": prof.get("diabetes_type", "Type 2"),
                         "has_hypertension": bool(prof.get("has_hypertension", 0)),
                         "has_high_cholesterol": bool(prof.get("has_high_cholesterol", 0)),
+                        # Returning users: treat stored flags as confirmed
+                        "hy_ans": "Yes" if prof.get("has_hypertension") else "No",
+                        "ch_ans": "Yes" if prof.get("has_high_cholesterol") else "No",
                         "phone_last4": prof.get("phone_last4", last4(pn)),
                         "prefer_desi": True, "veg_only": False,
                         "profile_complete": True, "setup_step": "done",
                         "on_insulin": False, "hypo_episodes": False, "weakness_between": False,
                     })
-                    h = prof.get("height_cm") or 0
                     w = prof.get("weight_kg") or 0
-                    if h > 0 and w > 0:
-                        ss["bmi"] = w / ((h / 100) ** 2)
+                    if h_cm > 0 and w > 0:
+                        ss["bmi"] = w / ((h_cm / 100) ** 2)
                     _run_triage(
                         ss.get("diabetes_type", "Type 2"),
                         ss.get("has_hypertension", False),
@@ -678,7 +476,7 @@ if ss.get("setup_step") in (1, 2):
         )
         st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
 
-        # ── STEP 1: Name, age, gender, height, weight, diabetes type, food prefs ──
+        # ── STEP 1 ────────────────────────────────────────────────────────────
         if step == 1:
             name_v  = st.text_input(t("wizard_name"), value=ss.get("name",""))
             col_age, col_gen = st.columns(2)
@@ -709,8 +507,6 @@ if ss.get("setup_step") in (1, 2):
                 st.caption(f"📏 Your BMI: **{bmi_v}** (estimated)")
 
             st.divider()
-
-            # Diabetes type with "Not sure" warning
             d_opts  = ["Type 1", "Type 2", "Not sure / not diagnosed"]
             saved_d = ss.get("diabetes_type", "Type 2")
             d_idx   = d_opts.index(saved_d) if saved_d in d_opts else 1
@@ -750,10 +546,10 @@ if ss.get("setup_step") in (1, 2):
                     })
                     st.rerun()
 
-        # ── STEP 2: Conditions, meal habits ──────────────────────────────────────
+        # ── STEP 2 ────────────────────────────────────────────────────────────
         else:
             st.markdown("### Do you have any of the following conditions?")
-            st.caption("Tick all that apply. If you have none, leave all unticked and click Finish.")
+            st.caption("Tick all that apply. Leave unticked if none apply.")
 
             hy_q    = st.radio("High blood pressure (hypertension)?",
                                ["No", "Yes", "Not sure"],
@@ -779,6 +575,18 @@ if ss.get("setup_step") in (1, 2):
             if ch_ns:
                 st.info("💡 A simple lipid panel blood test will tell you your cholesterol levels. Worth asking your doctor.")
 
+            # ── FIX 3: Family history now shown for ALL diabetes types ──
+            st.divider()
+            st.markdown("**Family history** *(optional)*")
+            st.caption("Does anyone in your immediate family (parents, siblings) have any of these?")
+            fam_hist = st.multiselect(
+                "Family history",
+                T["en"]["pf_family_opts"],
+                default=ss.get("family_history", []),
+                key="wiz_fam",
+                label_visibility="collapsed",
+            )
+
             st.divider()
             st.markdown("**A few more questions about your daily routine:**")
             ins  = st.checkbox(t("q_insulin"),  value=ss.get("on_insulin",  False), help=t("q_insulin_help"))
@@ -795,7 +603,6 @@ if ss.get("setup_step") in (1, 2):
                     with st.spinner(t("wizard_saving")):
                         dtype = ss.get("diabetes_type", "Type 2")
 
-                        # "Not sure" diabetes → force AMBER + disclaimer flag
                         if dtype == "Not sure / not diagnosed":
                             ss["triage_level"] = "AMBER"
                             ss["triage_flags"] = [
@@ -803,20 +610,19 @@ if ss.get("setup_step") in (1, 2):
                                 "Following a cautious low-GI plan until diagnosis is confirmed.",
                             ]
                         else:
-                            # Treat "Not sure" on BP/cholesterol conservatively (assume yes for safety)
-                            _run_triage(dtype, hy or hy_ns, ch or ch_ns,
-                                        other_major=other)
+                            _run_triage(dtype, hy or hy_ns, ch or ch_ns, other_major=other)
 
                         ss.update({
                             "has_hypertension":     hy or hy_ns,
                             "has_high_cholesterol": ch or ch_ns,
+                            # Store exact answer so profile card can distinguish "Yes" vs "Not sure"
                             "hy_ans":    hy_q,
                             "ch_ans":    ch_q,
                             "other_ans": other_q,
                             "on_insulin":       ins,
                             "hypo_episodes":    hypo,
                             "weakness_between": wkn,
-                            "family_history":   [],
+                            "family_history":   fam_hist,
                         })
                         upsert_profile(ss["user_key"], {
                             "full_name":    ss["name"],
@@ -825,7 +631,7 @@ if ss.get("setup_step") in (1, 2):
                             "gender":       ss.get("gender","Prefer not to say"),
                             "height_cm":    ss.get("height_cm", 0),
                             "weight_kg":    ss.get("weight_kg", 0.0),
-                            "family_history": [],
+                            "family_history": fam_hist,
                             "diabetes_type":        dtype,
                             "has_hypertension":     1 if (hy or hy_ns) else 0,
                             "has_high_cholesterol": 1 if (ch or ch_ns) else 0,
@@ -874,15 +680,27 @@ tabs = st.tabs([t("tab_plan"), t("tab_chat"), t("tab_glucose"), t("tab_dashboard
 #  TAB 0 — MY PLAN
 # ══════════════════════════════════════════════════════════════════════════════
 with tabs[0]:
-    lv       = _triage_level()
-    bcls     = {"GREEN":"badge-g","AMBER":"badge-a","RED":"badge-r"}.get(lv or "","badge-n")
-    blbl     = {"GREEN":t("status_green"),"AMBER":t("status_amber"),"RED":t("status_red")}.get(lv or "",t("status_none"))
-    conds    = ([("Hypertension" if _lang()=="en" else "ہائی بلڈ پریشر")] if ss.get("has_hypertension") else []) + \
-               ([("High Cholesterol" if _lang()=="en" else "زیادہ کولیسٹرول")] if ss.get("has_high_cholesterol") else [])
+    lv   = _triage_level()
+    bcls = {"GREEN":"badge-g","AMBER":"badge-a","RED":"badge-r"}.get(lv or "","badge-n")
+    blbl = {"GREEN":t("status_green"),"AMBER":t("status_amber"),"RED":t("status_red")}.get(lv or "",t("status_none"))
+
+    # ── FIX 2: Show "(unconfirmed)" when user said "Not sure" ──
+    conds = []
+    if ss.get("has_hypertension"):
+        label = "Hypertension" if _lang()=="en" else "ہائی بلڈ پریشر"
+        if ss.get("hy_ans") == "Not sure":
+            label += " (unconfirmed)" if _lang()=="en" else " (غیر یقینی)"
+        conds.append(label)
+    if ss.get("has_high_cholesterol"):
+        label = "High Cholesterol" if _lang()=="en" else "زیادہ کولیسٹرول"
+        if ss.get("ch_ans") == "Not sure":
+            label += " (unconfirmed)" if _lang()=="en" else " (غیر یقینی)"
+        conds.append(label)
     cond_str = ", ".join(conds) if conds else t("no_conditions")
-    name_d   = ss.get("name", ss.get("display_name",""))
-    age_d    = ss.get("age","")
-    dtype_d  = ss.get("diabetes_type","")
+
+    name_d  = ss.get("name", ss.get("display_name",""))
+    age_d   = ss.get("age","")
+    dtype_d = ss.get("diabetes_type","")
 
     pc1, pc2 = st.columns([5,1])
     with pc1:
@@ -911,12 +729,24 @@ with tabs[0]:
                 ds  = ss.get("diabetes_type","Type 2"); di = de.index(ds) if ds in de else 0
                 edt = st.selectbox(t("pf_diabetes"), do, index=di, key="e_dtype")
 
-            ef3, ef4 = st.columns(2)
-            with ef3: eh = st.number_input(t("pf_height"), 0, 250, int(ss.get("height_cm",0) or 0), key="e_h")
-            with ef4: ew = st.number_input(t("pf_weight"), 0.0, 400.0, float(ss.get("weight_kg",0.0) or 0.0), 0.5, key="e_w")
+            # ── FIX 1: Edit profile height in ft/inches (matches login wizard) ──
+            st.markdown(f"**{'Height' if _lang()=='en' else 'قد'}**")
+            # Prefer stored ft/in; fall back to converting stored cm
+            saved_ft, saved_in = _cm_to_ft_in(ss.get("height_cm", 0))
+            saved_ft = ss.get("height_ft", saved_ft)
+            saved_in = ss.get("height_in", saved_in)
+            ecol_ft, ecol_in = st.columns(2)
+            with ecol_ft:
+                e_hft = st.number_input("Feet",   0, 8,  int(saved_ft), key="e_hft")
+            with ecol_in:
+                e_hin = st.number_input("Inches", 0, 11, int(saved_in), key="e_hin")
+            eh = round((e_hft * 12 + e_hin) * 2.54)   # cm used for storage only
+
+            ew = st.number_input(t("pf_weight"), 0.0, 400.0, float(ss.get("weight_kg",0.0) or 0.0), 0.5, key="e_w")
             eb = None
             if eh > 0 and ew > 0:
-                eb = ew/((eh/100)**2); st.caption(f"{t('pf_bmi')}: **{eb:.1f}** {t('pf_bmi_note')}")
+                eb = ew / ((eh / 100) ** 2)
+                st.caption(f"{t('pf_bmi')}: **{eb:.1f}** {t('pf_bmi_note')}")
 
             efam = st.multiselect(t("pf_family"), T["en"]["pf_family_opts"], default=ss.get("family_history",[]), key="e_fam")
             ec1, ec2, ec3 = st.columns(3)
@@ -934,7 +764,7 @@ with tabs[0]:
             adv_key = "show_adv_" + str(ss.get("user_key",""))[:8]
             if adv_key not in ss: ss[adv_key] = False
 
-            # ── FIX: default values so save handler can always reference these ──
+            # Default values so save handler always has them defined
             ebps, ebpd, ea1c, etc, ef1, ef2, ef3 = 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0
 
             if st.button("➕ " + ("Add recent test results (optional)" if _lang()=="en" else "حالیہ ٹیسٹ کے نتائج شامل کریں"), key="adv_tog", use_container_width=False):
@@ -959,10 +789,16 @@ with tabs[0]:
                     with st.spinner(t("saving_profile")):
                         gn = T["en"]["pf_gender_opts"][T[_lang()]["pf_gender_opts"].index(egn)]
                         dn = T["en"]["pf_diabetes_opts"][T[_lang()]["pf_diabetes_opts"].index(edt)]
-                        ss.update({"name":en.strip(),"age":int(ea),"gender":gn,"diabetes_type":dn,
-                                   "height_cm":int(eh),"weight_kg":float(ew),"family_history":efam,
-                                   "bmi":eb,"has_hypertension":ehy,"has_high_cholesterol":ech,
-                                   "on_insulin":eins,"hypo_episodes":ehyp,"weakness_between":ewkn})
+                        ss.update({
+                            "name":en.strip(),"age":int(ea),"gender":gn,"diabetes_type":dn,
+                            "height_ft":int(e_hft),"height_in":int(e_hin),"height_cm":int(eh),
+                            "weight_kg":float(ew),"family_history":efam,
+                            "bmi":eb,"has_hypertension":ehy,"has_high_cholesterol":ech,
+                            # Edit profile checkboxes are explicit — always mark as confirmed
+                            "hy_ans": "Yes" if ehy else "No",
+                            "ch_ans": "Yes" if ech else "No",
+                            "on_insulin":eins,"hypo_episodes":ehyp,"weakness_between":ewkn,
+                        })
                         _run_triage(dn,ehy,ech,
                                     bp_sys=float(ebps) if ebps>0 else None,
                                     bp_dia=float(ebpd) if ebpd>0 else None,
@@ -1063,7 +899,6 @@ with tabs[0]:
                             swaps = generate_swaps("; ".join(names))
                         st.markdown(f"**{t('swaps_heading')}**")
                         for s in swaps: st.write("•", s)
-
 
     st.divider()
 
