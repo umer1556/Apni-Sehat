@@ -59,6 +59,9 @@ st.markdown("""
 }
 
 /* ── Base ── */
+html {
+    color-scheme: dark !important;
+}
 html, body,
 .stApp,
 [data-testid="stAppViewContainer"],
@@ -68,6 +71,33 @@ div.block-container,
 .main {
     background: var(--bg) !important;
     font-family: 'Inter', sans-serif !important;
+    color: var(--txt) !important;
+}
+
+/* ── Chat input — must be explicit or light-mode mobile renders black-on-black ── */
+[data-testid="stChatInput"],
+[data-testid="stChatInputContainer"],
+[data-testid="stChatInputContainer"] > div,
+[data-testid="stChatInputContainer"] textarea {
+    background: var(--bg3) !important;
+    color: var(--txt) !important;
+    border-color: var(--border) !important;
+    color-scheme: dark !important;
+}
+[data-testid="stChatInputContainer"] textarea::placeholder {
+    color: var(--txt3) !important;
+    opacity: 1 !important;
+}
+[data-testid="stChatInputContainer"] button {
+    background: var(--green2) !important;
+    color: #fff !important;
+    border: none !important;
+}
+/* Bottom chat bar wrapper */
+[data-testid="stBottom"],
+[data-testid="stBottom"] > div {
+    background: var(--bg) !important;
+    border-top: 1px solid var(--border) !important;
 }
 
 /* ── Sidebar ── */
