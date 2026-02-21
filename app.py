@@ -54,7 +54,7 @@ st.markdown("""
     --blue:    #58a6ff;
     --txt:     #e6edf3;
     --txt2:    #8b949e;
-    --txt3:    #484f58;
+    --txt3:    #8b949e;
     color-scheme: dark;
 }
 
@@ -112,7 +112,7 @@ div.block-container,
 [data-testid="stMarkdownContainer"] h2 { font-size: 1.55rem !important; font-weight: 700 !important; color: var(--green) !important; }
 [data-testid="stMarkdownContainer"] h3 { font-size: 1.25rem !important; font-weight: 700 !important; color: var(--txt) !important; }
 
-[data-testid="stCaptionContainer"] p  { font-size: 0.92rem !important; color: var(--txt3) !important; line-height: 1.7 !important; }
+[data-testid="stCaptionContainer"] p  { font-size: 0.95rem !important; color: #9ca3af !important; line-height: 1.75 !important; }
 
 /* ── Tabs ── */
 .stTabs [data-baseweb="tab-list"] {
