@@ -615,8 +615,11 @@ if "user_key" not in ss:
                         "on_insulin":False, "hypo_episodes":False, "weakness_between":False,
                     })
                     ss["name"] = prof.get("full_name") or name.strip()
-                    h = prof.get("height_cm",0); w = prof.get("weight_kg",0)
-                    if h > 0 and w > 0: ss["bmi"] = w/((h/100)**2)
+                    # ── FIX: use `or 0` so NULL from DB becomes 0, not None ──
+                    h = prof.get("height_cm") or 0
+                    w = prof.get("weight_kg") or 0
+                    if h > 0 and w > 0:
+                        ss["bmi"] = w / ((h / 100) ** 2)
                     st.success(f"{t('welcome_back')}, {ss['name']}! 👋")
                 else:
                     upsert_profile(uk, {"full_name":name.strip(),"phone_last4":last4(pn),"family_history":[]})
