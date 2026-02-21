@@ -169,25 +169,7 @@ div.block-container,
     box-shadow: 0 4px 14px rgba(63,185,80,0.35) !important;
 }
 
-/* Day-accordion button */
-.day-acc-row .stButton > button {
-    width: 100% !important;
-    text-align: left !important;
-    justify-content: flex-start !important;
-    font-size: 0.95rem !important;
-    font-weight: 600 !important;
-    padding: 12px 16px !important;
-    background: var(--bg2) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    color: var(--txt) !important;
-    margin-bottom: 4px !important;
-}
-.day-acc-row .stButton > button:hover {
-    border-color: var(--green) !important;
-    color: var(--txt) !important;
-    background: var(--bg3) !important;
-}
+/* day-acc-row removed — using native st.expander */
 
 /* ── Inputs ── */
 [data-baseweb="input"] input,
@@ -736,30 +718,7 @@ if not ss.get("week_plan"):
 
 
 # Late CSS injection — appears after Streamlit's own styles in DOM, guaranteed to win
-st.markdown("""
-<style>
-/* Day accordion full-width header button */
-.day-acc-row .stButton > button {
-    width: 100% !important;
-    text-align: left !important;
-    justify-content: flex-start !important;
-    color: var(--txt) !important;
-    font-size: 0.96rem !important;
-    font-weight: 600 !important;
-    padding: 12px 16px !important;
-    letter-spacing: 0 !important;
-    background: var(--bg2) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 10px !important;
-    margin-bottom: 4px !important;
-}
-.day-acc-row .stButton > button:hover {
-    background: #1a2030 !important;
-    border-color: var(--green) !important;
-    color: var(--txt) !important;
-}
-</style>
-""", unsafe_allow_html=True)
+
 
 tabs = st.tabs([t("tab_plan"), t("tab_chat"), t("tab_glucose"), t("tab_dashboard")])
 
@@ -924,69 +883,35 @@ with tabs[0]:
         ss["prefer_desi"] = prefer_desi; ss["veg_only"] = veg_only
 
         days  = _plan_days(); slots = _plan_slots(); lg = _lang()
-        # Manual accordion — no st.expander() so no Material Icons fallback text
-        if "open_days" not in ss:
-            ss["open_days"] = set()
 
         for day in days:
             day_carbs = sum(day[s]["carb_servings"]*CARB["carb_serving_grams"] for s in slots if s in day)
             day_num   = day["day"]
-            is_open   = day_num in ss["open_days"]
-            day_label = (f"Day {day_num}  ·  ~{day_carbs:.0f}g {t('carbs_label')}"
+            day_label = (f"📅 Day {day_num}  ·  ~{day_carbs:.0f}g {t('carbs_label')}"
                          if _lang()=="en" else
-                         f"دن {day_num}  ·  ~{day_carbs:.0f}g {t('carbs_label')}")
+                         f"📅 دن {day_num}  ·  ~{day_carbs:.0f}g {t('carbs_label')}")
 
-            # ── Single full-width button accordion ──────────────────────────────────
-            # on_click callback updates state BEFORE the natural Streamlit rerun.
-            # No explicit st.rerun() needed — avoids the double-rerender that made
-            # the accordion feel slow.
-            arrow = "▲" if is_open else "▽"
-            btn_label = f"📅  {day_label}    {arrow}"
+            with st.expander(day_label, expanded=False):
+                for slot in slots:
+                    if slot not in day: continue
+                    meal = day[slot]
+                    ico, le, lu = SLOT_CFG.get(slot, ("🍽️", slot.title(), slot.title()))
+                    lbl = le if lg == "en" else lu
+                    cg  = meal["carb_servings"] * CARB["carb_serving_grams"]
+                    st.markdown(f'<p class="meal-slot">{ico} {lbl}</p>', unsafe_allow_html=True)
+                    st.markdown(f"**{meal['name']}**")
+                    st.caption(f"~{cg}g carbs · {meal['notes']}")
+                    st.markdown('<div style="height:4px"></div>', unsafe_allow_html=True)
 
-            def _toggle_day(dn=day_num):
-                if dn in ss["open_days"]:
-                    ss["open_days"].discard(dn)
-                else:
-                    ss["open_days"].add(dn)
-
-            st.markdown('<div class="day-acc-row">', unsafe_allow_html=True)
-            st.button(
-                btn_label,
-                key=f"day_tog_{day_num}",
-                use_container_width=True,
-                on_click=_toggle_day,
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
-
-            # Content — only shown when open
-            if is_open:
-                with st.container():
-                    st.markdown(
-                        '<div style="background:var(--bg2);border:1px solid var(--border);'
-                        'border-top:none;border-radius:0 0 10px 10px;padding:14px 18px;'
-                        'margin-top:-6px;margin-bottom:10px;">',
-                        unsafe_allow_html=True)
-                    for slot in slots:
-                        if slot not in day: continue
-                        meal = day[slot]
-                        ico, le, lu = SLOT_CFG.get(slot,("🍽️",slot.title(),slot.title()))
-                        lbl = le if lg=="en" else lu
-                        cg  = meal["carb_servings"] * CARB["carb_serving_grams"]
-                        st.markdown(f'<p class="meal-slot">{ico} {lbl}</p>', unsafe_allow_html=True)
-                        st.markdown(f"**{meal['name']}**")
-                        st.caption(f"~{cg}g carbs · {meal['notes']}")
-                        st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
-                    st.markdown('</div>', unsafe_allow_html=True)
-                    sw_c, _ = st.columns([1,3])
-                    with sw_c:
-                        if st.button(t("swaps_btn"), key=f"sw_{day_num}", use_container_width=True):
-                            names = [day[s]["name"] for s in slots if s in day]
-                            with st.spinner(t("getting_swaps")):
-                                swaps = generate_swaps("; ".join(names))
-                            st.markdown(f"**{t('swaps_heading')}**")
-                            for s in swaps: st.write("•", s)
-            else:
-                st.markdown('<div style="margin-bottom:4px;"></div>', unsafe_allow_html=True)
+                st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
+                sw_c, _ = st.columns([1, 3])
+                with sw_c:
+                    if st.button(t("swaps_btn"), key=f"sw_{day_num}", use_container_width=True):
+                        names = [day[s]["name"] for s in slots if s in day]
+                        with st.spinner(t("getting_swaps")):
+                            swaps = generate_swaps("; ".join(names))
+                        st.markdown(f"**{t('swaps_heading')}**")
+                        for s in swaps: st.write("•", s)
 
 
     st.divider()
