@@ -38,351 +38,364 @@ init_db()
 
 st.markdown("""
 <style>
-/* Inter font only — do NOT import Material Icons/Symbols.
-   When those fonts fail to load they render raw ligature text as fallback. */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-/* Material Symbols loaded by Streamlit — do not re-import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 
-/* ═══ 0. Colour tokens ═══ */
+/* ── Tokens ── */
 :root {
-    --bg:       #0F1117;
-    --bg2:      #181C27;
-    --bg3:      #1E2436;
-    --border:   #2A3147;
-    --green:    #22C55E;
-    --green-dk: #16A34A;
-    --green-hi: #4ADE80;
-    --amber:    #F59E0B;
-    --red:      #EF4444;
-    --txt:      #E2E8F0;
-    --txt2:     #94A3B8;
-    --txt3:     #64748B;
+    --bg:      #0d1117;
+    --bg2:     #161b22;
+    --bg3:     #21262d;
+    --border:  #30363d;
+    --green:   #3fb950;
+    --green2:  #2ea043;
+    --green-t: rgba(63,185,80,0.15);
+    --amber:   #d29922;
+    --red:     #f85149;
+    --blue:    #58a6ff;
+    --txt:     #e6edf3;
+    --txt2:    #8b949e;
+    --txt3:    #484f58;
     color-scheme: dark;
 }
 
-/* ═══ 1. Sidebar collapse button styling ═══ */
-/* Material Symbols font is imported above with display=block so no raw text ever shows. */
-/* Sidebar */
-[data-testid="stSidebarCollapseButton"] button,
-[data-testid="collapsedControl"] button {
-    background: var(--bg3) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 6px !important;
-}
-[data-testid="stSidebarCollapseButton"] svg,
-[data-testid="collapsedControl"] svg { fill: var(--txt2) !important; }
-
-/* ═══ 2. Expander layout ═══ */
-[data-testid="stExpander"] summary {
-    position: relative !important;
-    display: flex !important;
-    align-items: center !important;
-    list-style: none !important;
-}
-[data-testid="stExpander"] summary::-webkit-details-marker { display: none !important; }
-[data-testid="stExpander"] summary > * {
-    /* kill any direct child that isn't the <p> label */
-    flex-shrink: 0;
-}
-[data-testid="stExpander"] summary p {
-    margin: 0 !important;
-    flex: 1 !important;
-    color: var(--txt) !important;
-    font-size: 0.95rem !important;
-    font-weight: 600 !important;
-    order: 1 !important;
-}
-/* Force icon span to order:0 (before label) but with zero footprint */
-[data-testid="stExpander"] summary span {
-    order: 0 !important;
-    font-size: 0px !important;
-    width: 0px !important;
-    height: 0px !important;
-    overflow: hidden !important;
-    opacity: 0 !important;
-}
-[data-testid="stExpander"] summary::after {
-    content: '';
-    order: 2 !important;
-    flex-shrink: 0;
-    display: block;
-    width: 7px; height: 7px;
-    border-right: 2px solid var(--green);
-    border-bottom: 2px solid var(--green);
-    transform: rotate(45deg);
-    transition: transform 0.2s ease;
-    margin-left: 12px;
-}
-[data-testid="stExpander"] details[open] summary::after {
-    transform: rotate(-135deg);
-    margin-top: 3px;
+/* ── Base ── */
+html, body,
+.stApp,
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewBlockContainer"],
+[data-testid="block-container"],
+div.block-container,
+.main {
+    background: var(--bg) !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
-/* ═══ 3. Base ═══ */
-html, body { background:var(--bg) !important; font-family:'Inter',sans-serif !important; }
-.stApp, [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockContainer"],
-[data-testid="block-container"], div.block-container, .main { background:var(--bg) !important; }
+/* ── Sidebar ── */
+[data-testid="stSidebar"],
+[data-testid="stSidebar"] > div,
+[data-testid="stSidebarContent"] {
+    background: var(--bg2) !important;
+    border-right: 1px solid var(--border) !important;
+}
 
-/* ═══ 4. Typography ═══ */
-/* NOTE: 'span' and 'div' deliberately excluded — they would override
-   font-family on .material-symbols-rounded spans, causing icon ligature
-   text to render as plain text (e.g. "keyboard_double_arrow_right"). */
-p, li, label, .stMarkdown p, .stMarkdown li {
-    font-family:'Inter',sans-serif !important;
-    font-size:0.98rem !important;
-    line-height:1.75 !important;
-    color:var(--txt) !important;
-}
-/* Apply Inter to divs and spans only where it is safe to do so */
-div:not([class*="material"]):not([data-testid*="Icon"]) {
-    font-family:'Inter',sans-serif !important;
-}
-span:not(.material-symbols-rounded):not(.material-symbols-outlined):not(.material-symbols-sharp) {
-    font-family:'Inter',sans-serif !important;
-}
-h1 { font-size:1.9rem !important; font-weight:800 !important; color:var(--green) !important; letter-spacing:-0.5px !important; }
-h2 { font-size:1.4rem !important; font-weight:700 !important; color:var(--green) !important; }
-h3 { font-size:1.1rem !important; font-weight:700 !important; color:var(--txt) !important; }
+/* ── Typography — SAFE: only block-level & known containers ── */
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li,
 [data-testid="stMarkdownContainer"] h1,
-[data-testid="stMarkdownContainer"] h2 { color:var(--green) !important; }
-.stCaption, [data-testid="stCaptionContainer"] p { font-size:0.82rem !important; color:var(--txt3) !important; }
-
-/* ═══ 5. Sidebar ═══ */
-[data-testid="stSidebar"], [data-testid="stSidebar"] > div, [data-testid="stSidebarContent"] {
-    background:var(--bg2) !important; border-right:1px solid var(--border) !important;
+[data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3,
+[data-testid="stCaptionContainer"] p,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] li,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] caption,
+.stButton > button,
+.stTextInput > label,
+.stSelectbox > label,
+.stNumberInput > label,
+.stTextArea > label,
+.stRadio > label,
+.stCheckbox > label,
+.stDateInput > label,
+.stTimeInput > label,
+.stToggle > label,
+.stMultiSelect > label {
+    font-family: 'Inter', sans-serif !important;
+    color: var(--txt) !important;
 }
-[data-testid="stSidebar"] * { color:var(--txt) !important; font-family:'Inter',sans-serif !important; }
-[data-testid="stSidebar"] h2 { color:var(--green) !important; font-size:1.1rem !important; font-weight:700 !important; }
-[data-testid="stSidebar"] .stCaption p { color:var(--txt3) !important; font-size:0.78rem !important; }
-[data-testid="stSidebar"] hr { border-color:var(--border) !important; margin:12px 0 !important; }
 
-/* ═══ 6. Buttons ═══ */
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stSidebar"] p { font-size: 0.95rem !important; line-height: 1.7 !important; }
+
+[data-testid="stMarkdownContainer"] h1 { font-size: 2rem !important; font-weight: 800 !important; color: var(--green) !important; letter-spacing: -0.5px !important; }
+[data-testid="stMarkdownContainer"] h2 { font-size: 1.35rem !important; font-weight: 700 !important; color: var(--green) !important; }
+[data-testid="stMarkdownContainer"] h3 { font-size: 1.1rem !important; font-weight: 700 !important; color: var(--txt) !important; }
+
+[data-testid="stCaptionContainer"] p  { font-size: 0.8rem !important; color: var(--txt3) !important; line-height: 1.6 !important; }
+
+/* ── Tabs ── */
+.stTabs [data-baseweb="tab-list"] {
+    background: var(--bg2) !important;
+    border-bottom: 1px solid var(--border) !important;
+    gap: 0 !important;
+}
+.stTabs [data-baseweb="tab"] {
+    background: transparent !important;
+    color: var(--txt2) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    padding: 12px 20px !important;
+    border-bottom: 2px solid transparent !important;
+    min-height: 48px !important;
+}
+.stTabs [aria-selected="true"] {
+    color: var(--green) !important;
+    border-bottom-color: var(--green) !important;
+}
+.stTabs [data-baseweb="tab-panel"] {
+    background: var(--bg) !important;
+    padding-top: 24px !important;
+}
+
+/* ── Buttons ── */
+.stButton > button {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    min-height: 38px !important;
+    padding: 0.45rem 1.1rem !important;
+    transition: all 0.15s ease !important;
+    background: var(--bg3) !important;
+    color: var(--txt) !important;
+    border: 1px solid var(--border) !important;
+}
+.stButton > button:hover {
+    background: var(--bg2) !important;
+    border-color: var(--green) !important;
+    color: var(--green) !important;
+}
 .stButton > button[kind="primary"] {
-    background:var(--green) !important; color:#0a1a0f !important; border:none !important;
-    border-radius:10px !important; font-family:'Inter',sans-serif !important;
-    font-size:0.95rem !important; font-weight:700 !important;
-    padding:0.6rem 1.8rem !important; min-height:44px !important;
-    width:auto !important; letter-spacing:0.01em !important; transition:all 0.18s ease !important;
+    background: var(--green2) !important;
+    color: #fff !important;
+    border: none !important;
+    font-weight: 700 !important;
 }
 .stButton > button[kind="primary"]:hover {
-    background:var(--green-hi) !important; transform:translateY(-1px) !important;
-    box-shadow:0 4px 16px rgba(34,197,94,0.35) !important;
+    background: var(--green) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px rgba(63,185,80,0.35) !important;
 }
-.stButton > button {
-    background:var(--bg3) !important; color:var(--green) !important;
-    border:1px solid var(--border) !important; border-radius:10px !important;
-    font-family:'Inter',sans-serif !important; font-size:0.9rem !important;
-    font-weight:600 !important; min-height:40px !important;
-    padding:0.5rem 1.2rem !important; transition:all 0.15s ease !important;
-}
-.stButton > button:hover { background:#1E2D1E !important; border-color:var(--green) !important; }
 
-/* Day-accordion full-width header button */
+/* Day-accordion button */
 .day-acc-row .stButton > button {
     width: 100% !important;
     text-align: left !important;
     justify-content: flex-start !important;
-    color: var(--txt) !important;
-    font-size: 0.96rem !important;
+    font-size: 0.95rem !important;
     font-weight: 600 !important;
     padding: 12px 16px !important;
+    background: var(--bg2) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    color: var(--txt) !important;
+    margin-bottom: 4px !important;
+}
+.day-acc-row .stButton > button:hover {
+    border-color: var(--green) !important;
+    color: var(--txt) !important;
+    background: var(--bg3) !important;
+}
+
+/* ── Inputs ── */
+[data-baseweb="input"] input,
+[data-baseweb="textarea"] textarea,
+.stTextInput input,
+.stNumberInput input,
+.stTextArea textarea {
+    background: var(--bg3) !important;
+    color: var(--txt) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.92rem !important;
+}
+[data-baseweb="input"] input:focus,
+[data-baseweb="textarea"] textarea:focus {
+    border-color: var(--green) !important;
+    box-shadow: 0 0 0 3px rgba(63,185,80,0.12) !important;
+}
+
+/* ── Labels ── */
+.stTextInput label,
+.stNumberInput label,
+.stTextArea label,
+.stSelectbox label,
+.stDateInput label,
+.stTimeInput label,
+.stRadio legend,
+.stCheckbox label,
+.stToggle label,
+.stMultiSelect label {
+    color: var(--txt2) !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+}
+
+/* ── Selectbox ── */
+[data-baseweb="select"] > div {
+    background: var(--bg3) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+    color: var(--txt) !important;
+}
+[data-baseweb="popover"] [role="listbox"],
+[data-baseweb="menu"] {
+    background: var(--bg2) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+}
+[data-baseweb="menu"] li { color: var(--txt) !important; font-size: 0.92rem !important; }
+[data-baseweb="menu"] li:hover { background: var(--bg3) !important; }
+
+/* ── Radio / Checkbox / Toggle ── */
+.stRadio [role="radiogroup"] label,
+.stCheckbox label,
+.stToggle label {
+    color: var(--txt) !important;
+    font-size: 0.92rem !important;
+    font-weight: 400 !important;
+    text-transform: none !important;
     letter-spacing: 0 !important;
 }
 
-/* ═══ 7. Inputs ═══ */
-.stTextInput > div > div > input, .stNumberInput > div > div > input,
-.stTextArea textarea, [data-baseweb="input"] input, [data-baseweb="textarea"] textarea {
-    background:var(--bg3) !important; color:var(--txt) !important;
-    border:1px solid var(--border) !important; border-radius:8px !important;
-    font-family:'Inter',sans-serif !important; font-size:0.95rem !important;
-    padding:0.55rem 0.9rem !important; min-height:44px !important;
-}
-.stTextInput > div > div > input:focus, .stTextArea textarea:focus {
-    border-color:var(--green) !important; box-shadow:0 0 0 2px rgba(34,197,94,0.18) !important;
-}
-[data-baseweb="input"] { background:var(--bg3) !important; }
-.stTextInput label, .stNumberInput label, .stTextArea label, .stSelectbox label,
-.stDateInput label, .stTimeInput label, .stRadio label > div > p,
-.stMultiSelect label, [data-testid="stFormLabel"] p {
-    color:var(--txt2) !important; font-size:0.83rem !important; font-weight:600 !important;
-    letter-spacing:0.04em !important; text-transform:uppercase !important;
-}
-
-/* ═══ 8. Selectbox ═══ */
-[data-baseweb="select"] > div {
-    background:var(--bg3) !important; color:var(--txt) !important;
-    border:1px solid var(--border) !important; border-radius:8px !important;
-}
-[data-baseweb="select"] span, [data-baseweb="select"] div { color:var(--txt) !important; }
-[data-baseweb="popover"] [role="listbox"], [data-baseweb="menu"] {
-    background:var(--bg3) !important; border:1px solid var(--border) !important; border-radius:8px !important;
-}
-[data-baseweb="menu"] li { color:var(--txt) !important; font-size:0.95rem !important; }
-[data-baseweb="menu"] li:hover { background:#1E2D1E !important; }
-
-/* ═══ 9. Checkboxes / Radio / Toggle ═══ */
-.stCheckbox label, .stCheckbox span, [data-testid="stCheckbox"] label {
-    color:var(--txt) !important; font-size:0.95rem !important;
-    font-weight:400 !important; text-transform:none !important;
-}
-.stRadio label, .stRadio div[role="radiogroup"] label { color:var(--txt) !important; font-size:0.95rem !important; }
-.stToggle label p { color:var(--txt) !important; font-size:0.95rem !important; }
-
-/* ═══ 10. Date / Time ═══ */
-input[type="date"], input[type="time"] {
-    background:var(--bg3) !important; color:var(--txt) !important;
-    border:1px solid var(--border) !important; border-radius:8px !important;
-}
-
-/* ═══ 11. Tabs ═══ */
-.stTabs [data-baseweb="tab-list"] {
-    background:var(--bg2) !important; border-bottom:1px solid var(--border) !important; gap:2px !important;
-}
-.stTabs [data-baseweb="tab"] {
-    background:transparent !important; color:var(--txt3) !important;
-    font-family:'Inter',sans-serif !important; font-size:0.88rem !important;
-    font-weight:600 !important; padding:12px 18px !important;
-    border-bottom:2px solid transparent !important; min-height:46px !important;
-}
-.stTabs [aria-selected="true"] {
-    color:var(--green) !important; border-bottom:2px solid var(--green) !important; font-weight:700 !important;
-}
-.stTabs [data-baseweb="tab-panel"] { background:var(--bg) !important; padding-top:20px !important; }
-
-/* ═══ 12. Expander container styling ═══ */
-[data-testid="stExpander"] {
-    background:var(--bg2) !important; border:1px solid var(--border) !important;
-    border-radius:10px !important; overflow:hidden !important;
-}
-[data-testid="stExpander"] summary { padding:12px 16px !important; }
-[data-testid="stExpander"] summary:hover { background:#1a2030 !important; }
-[data-testid="stExpander"] > div > div { background:var(--bg2) !important; padding:12px 16px !important; }
-
-/* ═══ 13. Metrics ═══ */
+/* ── Metrics ── */
 [data-testid="stMetric"] {
-    background:var(--bg2) !important; border:1px solid var(--border) !important;
-    border-radius:12px !important; padding:14px 18px !important;
+    background: var(--bg2) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    padding: 16px 20px !important;
 }
-[data-testid="stMetricValue"] { font-size:1.8rem !important; font-weight:800 !important; color:var(--green) !important; }
-[data-testid="stMetricLabel"] { color:var(--txt2) !important; font-size:0.8rem !important; font-weight:600 !important; text-transform:uppercase !important; letter-spacing:0.05em !important; }
-[data-testid="stMetricDelta"]  { color:var(--txt3) !important; }
-
-/* ═══ 14. Alerts ═══ */
-div[data-testid="stSuccess"] { background:#052e16 !important; border-left:4px solid var(--green) !important; border-radius:8px !important; }
-div[data-testid="stSuccess"] * { color:#86EFAC !important; }
-div[data-testid="stInfo"]    { background:#0c1a3a !important; border-left:4px solid #3B82F6 !important; border-radius:8px !important; }
-div[data-testid="stInfo"]    * { color:#93C5FD !important; }
-div[data-testid="stWarning"] { background:#1c1000 !important; border-left:4px solid var(--amber) !important; border-radius:8px !important; }
-div[data-testid="stWarning"] * { color:#FCD34D !important; }
-div[data-testid="stError"]   { background:#1a0505 !important; border-left:4px solid var(--red) !important; border-radius:8px !important; }
-div[data-testid="stError"]   * { color:#FCA5A5 !important; }
-
-/* ═══ 15. Misc ═══ */
-hr { border-color:var(--border) !important; margin:16px 0 !important; }
-[data-testid="stDataFrame"], [data-testid="stDataFrame"] th, [data-testid="stDataFrame"] td {
-    background:var(--bg2) !important; color:var(--txt) !important;
+[data-testid="stMetricValue"] {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 1.7rem !important;
+    font-weight: 800 !important;
+    color: var(--green) !important;
 }
-[data-baseweb="tag"] { background:#1a2e1a !important; color:var(--green-hi) !important; }
-.stNumberInput button { background:var(--bg3) !important; color:var(--green) !important; border-color:var(--border) !important; }
-[data-testid="stSpinner"] p { color:var(--green) !important; }
-
-/* ════════════ CUSTOM COMPONENTS ════════════ */
-
-.login-hero { text-align:center; padding:48px 20px 32px; margin-bottom:4px; }
-.login-hero-logo {
-    font-family:'Inter',sans-serif !important;
-    font-size:4.2rem !important; font-weight:900 !important;
-    color:var(--green) !important; letter-spacing:-2px !important;
-    line-height:1.05 !important; display:block !important;
-    text-shadow:0 0 40px rgba(34,197,94,0.25);
-}
-.login-hero-urdu {
-    font-size:2.1rem !important; color:var(--green-hi) !important;
-    font-weight:700 !important; display:block !important;
-    margin-top:4px !important; letter-spacing:0 !important;
-}
-.login-hero-sub {
-    font-size:1.08rem !important; color:var(--txt2) !important;
-    margin-top:12px !important; display:block !important; font-weight:400 !important;
+[data-testid="stMetricLabel"] {
+    font-family: 'Inter', sans-serif !important;
+    color: var(--txt2) !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
 }
 
+/* ── Alerts ── */
+[data-testid="stSuccess"] { background: #0d2018 !important; border-left: 3px solid var(--green) !important; border-radius: 6px !important; }
+[data-testid="stInfo"]    { background: #0d1c36 !important; border-left: 3px solid var(--blue) !important;  border-radius: 6px !important; }
+[data-testid="stWarning"] { background: #1f1700 !important; border-left: 3px solid var(--amber) !important; border-radius: 6px !important; }
+[data-testid="stError"]   { background: #1f0a0a !important; border-left: 3px solid var(--red) !important;   border-radius: 6px !important; }
+
+/* ── Expander ── */
+[data-testid="stExpander"] {
+    background: var(--bg2) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+}
+[data-testid="stExpander"] summary { padding: 12px 16px !important; }
+[data-testid="stExpander"] summary:hover { background: var(--bg3) !important; border-radius: 8px !important; }
+[data-testid="stExpander"] > div > div { background: var(--bg2) !important; padding: 12px 16px !important; }
+
+/* ── Dataframe ── */
+[data-testid="stDataFrame"] { background: var(--bg2) !important; border: 1px solid var(--border) !important; border-radius: 8px !important; }
+
+/* ── Date / Time ── */
+input[type="date"], input[type="time"] {
+    background: var(--bg3) !important;
+    color: var(--txt) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+}
+
+/* ── Number input stepper buttons ── */
+.stNumberInput button {
+    background: var(--bg3) !important;
+    border-color: var(--border) !important;
+    color: var(--txt2) !important;
+}
+
+/* ── Divider ── */
+hr { border-color: var(--border) !important; }
+
+/* ── Spinner ── */
+[data-testid="stSpinner"] p { color: var(--green) !important; }
+[data-baseweb="tag"] { background: var(--green-t) !important; color: var(--green) !important; }
+
+/* ── Custom components ── */
 .tip-banner {
-    background:linear-gradient(135deg,#052e16,#0f3d1c);
-    border:1px solid #16A34A; border-radius:14px;
-    padding:18px 22px; margin-bottom:20px;
-    font-size:0.96rem; line-height:1.75;
-    box-shadow:0 2px 12px rgba(34,197,94,0.12);
+    background: linear-gradient(135deg, #0d2018, #0d1f14);
+    border: 1px solid var(--green2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.93rem;
+    line-height: 1.7;
+    color: #aff4c2;
 }
-.tip-banner * { color:#D1FAE5 !important; }
 .tip-label {
-    font-size:0.68rem; font-weight:700; letter-spacing:0.14em;
-    text-transform:uppercase; color:var(--green-hi) !important;
-    margin-bottom:6px; display:block;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 6px;
+    display: block;
 }
-
 .profile-card {
-    background:var(--bg2); border:1px solid var(--border);
-    border-left:4px solid var(--green); border-radius:12px;
-    padding:16px 22px; margin-bottom:18px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin-bottom: 16px;
+    font-family: 'Inter', sans-serif;
 }
-.profile-name { font-size:1.1rem; font-weight:700; color:#F0FFF4 !important; }
-.profile-detail { font-size:0.88rem; color:var(--txt2) !important; margin-top:4px; }
-
-.badge-g { background:#052e16; color:#4ADE80 !important; border:1px solid #16A34A; border-radius:6px; padding:3px 12px; font-weight:700; font-size:0.82rem; display:inline-block; }
-.badge-a { background:#1c1000; color:#FCD34D !important; border:1px solid #F59E0B; border-radius:6px; padding:3px 12px; font-weight:700; font-size:0.82rem; display:inline-block; }
-.badge-r { background:#1a0505; color:#FCA5A5 !important; border:1px solid #EF4444; border-radius:6px; padding:3px 12px; font-weight:700; font-size:0.82rem; display:inline-block; }
-.badge-n { background:var(--bg3); color:var(--txt3) !important; border:1px solid var(--border); border-radius:6px; padding:3px 12px; font-weight:700; font-size:0.82rem; display:inline-block; }
-
+.profile-name  { font-size: 1.05rem; font-weight: 700; color: var(--txt);  }
+.profile-detail{ font-size: 0.85rem; color: var(--txt2); margin-top: 3px;  }
+.badge-g { background: #0d2018; color: #3fb950; border: 1px solid #2ea043; border-radius: 5px; padding: 2px 10px; font-weight: 700; font-size: 0.8rem; display: inline-block; font-family: 'Inter', sans-serif; }
+.badge-a { background: #1f1700; color: #d29922; border: 1px solid #9e6a03; border-radius: 5px; padding: 2px 10px; font-weight: 700; font-size: 0.8rem; display: inline-block; font-family: 'Inter', sans-serif; }
+.badge-r { background: #1f0a0a; color: #f85149; border: 1px solid #b91c1c; border-radius: 5px; padding: 2px 10px; font-weight: 700; font-size: 0.8rem; display: inline-block; font-family: 'Inter', sans-serif; }
+.badge-n { background: var(--bg3); color: var(--txt3); border: 1px solid var(--border); border-radius: 5px; padding: 2px 10px; font-weight: 700; font-size: 0.8rem; display: inline-block; font-family: 'Inter', sans-serif; }
 .bubble-user {
-    background:#1a2e1a; border:1px solid #16A34A; border-radius:16px 16px 4px 16px;
-    padding:14px 18px; margin:8px 0; margin-left:10%;
-    font-size:0.96rem; line-height:1.75; color:#D1FAE5 !important;
+    background: #0d2018; border: 1px solid var(--green2); border-radius: 12px 12px 3px 12px;
+    padding: 12px 16px; margin: 6px 0; margin-left: 8%;
+    font-family: 'Inter', sans-serif; font-size: 0.92rem; line-height: 1.7; color: #aff4c2;
 }
 .bubble-bot {
-    background:var(--bg2); border:1px solid var(--border); border-radius:16px 16px 16px 4px;
-    padding:14px 18px; margin:8px 0; margin-right:10%;
-    font-size:0.96rem; line-height:1.75; color:var(--txt) !important;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 12px 12px 12px 3px;
+    padding: 12px 16px; margin: 6px 0; margin-right: 8%;
+    font-family: 'Inter', sans-serif; font-size: 0.92rem; line-height: 1.7; color: var(--txt);
 }
-.bubble-label { font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--txt3) !important; margin-bottom:4px; }
-
+.bubble-label { font-family: 'Inter', sans-serif; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--txt3); margin-bottom: 3px; }
 .wizard-box {
-    background:var(--bg2); border:1px solid var(--border);
-    border-top:4px solid var(--green); border-radius:16px;
-    padding:28px 32px; margin:0 auto; max-width:580px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-top: 3px solid var(--green); border-radius: 10px;
+    padding: 28px 32px; margin: 0 auto; max-width: 560px;
+    font-family: 'Inter', sans-serif;
 }
-.wizard-box h2 { color:var(--green) !important; margin-bottom:6px; }
-.wizard-box p  { color:var(--txt2) !important; margin-bottom:0; }
 .step-pill {
-    background:#052e16; color:var(--green-hi) !important;
-    border:1px solid #16A34A; border-radius:20px;
-    padding:4px 14px; font-size:0.75rem; font-weight:700;
-    display:inline-block; margin-bottom:14px; letter-spacing:0.04em;
+    background: #0d2018; color: var(--green); border: 1px solid var(--green2);
+    border-radius: 20px; padding: 3px 12px; font-size: 0.73rem; font-weight: 700;
+    display: inline-block; margin-bottom: 12px; font-family: 'Inter', sans-serif;
 }
-
 .feature-card {
-    background:var(--bg2); border:1px solid var(--border); border-radius:14px;
-    padding:24px 26px; height:100%;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 22px 24px; height: 100%; font-family: 'Inter', sans-serif;
 }
-.feature-card p { color:var(--txt) !important; font-size:0.96rem !important; margin:8px 0 !important; }
-.feature-card .disc { color:var(--txt3) !important; font-size:0.83rem !important; }
-
 .sb-disc {
-    background:#110e00; border:1px solid #3a2800;
-    border-left:3px solid var(--amber);
-    border-radius:8px; padding:12px 14px; margin-top:2px;
+    background: #1a1200; border: 1px solid #3a2800; border-left: 3px solid var(--amber);
+    border-radius: 6px; padding: 10px 12px; margin-top: 4px;
+    font-family: 'Inter', sans-serif;
 }
-.sb-disc p { color:var(--txt2) !important; font-size:0.78rem !important; line-height:1.65 !important; margin:2px 0 !important; text-transform:none !important; letter-spacing:0 !important; }
-.sb-disc strong { color:#FCD34D !important; }
-.sb-disc-title { font-size:0.82rem !important; font-weight:700 !important; color:var(--amber) !important; margin-bottom:6px !important; }
-
-.meal-slot { font-size:0.82rem; font-weight:700; color:var(--green) !important; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:2px; }
+.sb-disc-title { font-size: 0.8rem; font-weight: 700; color: var(--amber); margin-bottom: 4px; font-family: 'Inter', sans-serif; }
+.meal-slot { font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
 .section-label {
-    font-size:0.72rem; font-weight:700; color:var(--txt3) !important;
-    text-transform:uppercase; letter-spacing:0.1em;
-    border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:14px;
+    font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 700; color: var(--txt3);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 12px;
 }
-
-.footer { font-size:0.78rem; color:var(--txt3) !important; text-align:center; padding:12px 0; border-top:1px solid var(--border); margin-top:32px; }
+.login-hero { text-align: center; padding: 48px 20px 28px; }
+.login-hero-logo { font-family: 'Inter', sans-serif; font-size: 3.6rem; font-weight: 900; color: var(--green); letter-spacing: -2px; line-height: 1; display: block; }
+.login-hero-urdu { font-size: 1.9rem; color: #3fb950; font-weight: 700; display: block; margin-top: 4px; }
+.login-hero-sub  { font-family: 'Inter', sans-serif; font-size: 1rem; color: var(--txt2); margin-top: 10px; display: block; }
+.footer { font-family: 'Inter', sans-serif; font-size: 0.75rem; color: var(--txt3); text-align: center; padding: 10px 0; border-top: 1px solid var(--border); margin-top: 28px; }
 </style>
 """, unsafe_allow_html=True)
 
