@@ -41,6 +41,9 @@ st.markdown("""
 /* Inter font only — do NOT import Material Icons/Symbols.
    When those fonts fail to load they render raw ligature text as fallback. */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+/* Load Material Symbols with display=block so it NEVER shows raw ligature text fallback.
+   'block' tells the browser to render nothing (not fallback text) until the font loads. */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,0,0&display=block');
 
 /* ═══ 0. Colour tokens ═══ */
 :root {
@@ -59,38 +62,8 @@ st.markdown("""
     color-scheme: dark;
 }
 
-/* ═══ 1. Sidebar + Expander icon fix — nuclear edition ═══ */
-/* Completely eliminate Material Symbols / Icons ligature text */
-html body .stApp .material-symbols-rounded,
-html body .material-symbols-rounded,
-.material-symbols-rounded,
-span.material-symbols-rounded,
-button span.material-symbols-rounded,
-[data-testid] span.material-symbols-rounded {
-    font-size: 0 !important;
-    width: 0 !important;
-    max-width: 0 !important;
-    height: 0 !important;
-    max-height: 0 !important;
-    display: inline-block !important;
-    overflow: hidden !important;
-    color: transparent !important;
-    line-height: 0 !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: none !important;
-    pointer-events: none !important;
-}
-/* Also kill the sidebar collapse icon text specifically */
-[data-testid="stSidebarCollapseButton"] button p,
-[data-testid="collapsedControl"] button p {
-    font-size: 0 !important;
-    width: 0 !important;
-    overflow: hidden !important;
-    color: transparent !important;
-}
+/* ═══ 1. Sidebar collapse button styling ═══ */
+/* Material Symbols font is imported above with display=block so no raw text ever shows. */
 /* Sidebar */
 [data-testid="stSidebarCollapseButton"] button,
 [data-testid="collapsedControl"] button {
@@ -744,32 +717,6 @@ if not ss.get("week_plan"):
 # Late CSS injection — appears after Streamlit's own styles in DOM, guaranteed to win
 st.markdown("""
 <style>
-/* Late override — CSS layer */
-html body .material-symbols-rounded,
-html body span.material-symbols-rounded,
-button span.material-symbols-rounded {
-    font-size: 0 !important;
-    width: 0 !important;
-    max-width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    color: transparent !important;
-    display: inline-block !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-[data-testid="stExpanderToggleIcon"],
-[data-testid="stExpanderToggleIcon"] * {
-    font-size: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-    opacity: 0 !important;
-    position: absolute !important;
-    color: transparent !important;
-}
 /* Day accordion full-width header button */
 .day-acc-row .stButton > button {
     width: 100% !important;
@@ -791,33 +738,6 @@ button span.material-symbols-rounded {
     color: var(--txt) !important;
 }
 </style>
-<script>
-// JS is the only reliable way to kill Material Icons ligature text in sidebar buttons.
-// CSS font-size:0 loses when Streamlit sets inline styles; JS wins unconditionally.
-(function hideMaterialIcons() {
-    function kill() {
-        document.querySelectorAll(
-            '.material-symbols-rounded, [data-testid="stExpanderToggleIcon"]'
-        ).forEach(function(el) {
-            el.style.setProperty('font-size',   '0',       'important');
-            el.style.setProperty('width',       '0',       'important');
-            el.style.setProperty('max-width',   '0',       'important');
-            el.style.setProperty('height',      '0',       'important');
-            el.style.setProperty('overflow',    'hidden',  'important');
-            el.style.setProperty('opacity',     '0',       'important');
-            el.style.setProperty('visibility',  'hidden',  'important');
-            el.style.setProperty('color',       'transparent', 'important');
-            el.style.setProperty('padding',     '0',       'important');
-            el.style.setProperty('margin',      '0',       'important');
-            el.style.setProperty('line-height', '0',       'important');
-        });
-    }
-    kill();
-    // Watch for Streamlit dynamically inserting new elements (sidebar toggle, etc.)
-    var obs = new MutationObserver(kill);
-    obs.observe(document.documentElement, { childList: true, subtree: true });
-})();
-</script>
 """, unsafe_allow_html=True)
 
 tabs = st.tabs([t("tab_plan"), t("tab_chat"), t("tab_glucose"), t("tab_dashboard")])
