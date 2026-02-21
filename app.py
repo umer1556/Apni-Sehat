@@ -62,85 +62,58 @@ st.markdown("""
     color-scheme: dark;
 }
 
-/* ═══ 1. Sidebar collapse button — ZERO OUT TEXT ═══ */
-/* Zero out the font size to kill raw text nodes like double_arrow_right */
+/* ═══ 1. Sidebar collapse button — PRESERVE LAYOUT FIX ═══ */
 [data-testid="stSidebarCollapseButton"],
 [data-testid="collapsedControl"] {
-    font-size: 0 !important; 
-    color: transparent !important;
+    visibility: hidden !important; /* Hides raw text/icons but keeps the space */
     position: relative !important;
 }
-/* Hide any child elements like SVGs or Spans */
-[data-testid="stSidebarCollapseButton"] *,
-[data-testid="collapsedControl"] * {
-    display: none !important;
-}
-
 /* Draw Close arrow (points left) */
 [data-testid="stSidebarCollapseButton"]::after {
     content: '' !important;
+    visibility: visible !important; /* Bring arrow back to visibility */
     position: absolute !important;
     top: 50% !important; left: 50% !important;
     width: 10px !important; height: 10px !important;
     border-left: 2px solid var(--txt2) !important;
     border-bottom: 2px solid var(--txt2) !important;
     transform: translate(-30%, -50%) rotate(45deg) !important;
-    display: block !important;
-    visibility: visible !important;
 }
-
 /* Draw Open arrow (points right) */
 [data-testid="collapsedControl"]::after {
     content: '' !important;
+    visibility: visible !important;
     position: absolute !important;
     top: 50% !important; left: 50% !important;
     width: 10px !important; height: 10px !important;
     border-right: 2px solid var(--txt2) !important;
     border-bottom: 2px solid var(--txt2) !important;
     transform: translate(-70%, -50%) rotate(-45deg) !important;
-    display: block !important;
-    visibility: visible !important;
 }
 
-/* ═══ 2. Expander arrow — ZERO OUT TEXT ═══ */
-/* Zero out the font size of the summary to hide raw text nodes like _arrow_right */
-[data-testid="stExpander"] summary {
-    font-size: 0 !important; 
-    color: transparent !important;
-    position: relative !important;
-    padding-right: 36px !important; 
-}
-/* Hide the default toggle icon container */
+/* ═══ 2. Expander arrow — PRESERVE LAYOUT FIX ═══ */
+/* Hide the icon container's contents but KEEP its dimensions */
 [data-testid="stExpanderToggleIcon"] {
-    display: none !important;
+    visibility: hidden !important; 
+    position: relative !important;
+    width: 24px !important; 
+    height: 24px !important;
 }
-/* Restore the label text size and color (e.g. "Edit Profile", "Day 1") */
-[data-testid="stExpander"] summary p {
-    font-size: 0.95rem !important;
-    color: var(--txt) !important;
-    font-weight: 600 !important;
-    display: block !important;
-    visibility: visible !important;
-}
-/* Draw Expander arrow (points down) */
-[data-testid="stExpander"] summary::after {
+/* Draw Expander arrow (points down) inside the invisible container */
+[data-testid="stExpanderToggleIcon"]::after {
     content: '' !important;
-    position: absolute !important;
-    right: 18px !important;
-    top: 50% !important;
-    width: 8px !important;
-    height: 8px !important;
-    border-right: 2px solid var(--green) !important;
-    border-bottom: 2px solid var(--green) !important;
-    transform: translateY(-50%) rotate(45deg) !important;
-    transition: transform 0.2s ease !important;
-    pointer-events: none !important;
-    display: block !important;
     visibility: visible !important;
+    position: absolute !important;
+    top: 50% !important; left: 50% !important;
+    width: 8px !important; height: 8px !important;
+    border-right: 2px solid var(--txt2) !important;
+    border-bottom: 2px solid var(--txt2) !important;
+    transform: translate(-50%, -70%) rotate(45deg) !important;
+    transition: transform 0.2s ease !important;
 }
 /* Rotate the Expander arrow when opened (points up) */
-[data-testid="stExpander"] details[open] summary::after {
-    transform: translateY(-50%) rotate(-135deg) !important;
+[data-testid="stExpander"] details[open] [data-testid="stExpanderToggleIcon"]::after {
+    transform: translate(-50%, -30%) rotate(-135deg) !important;
 }
 
 /* ═══ 3. Base ═══ */
