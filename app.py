@@ -38,9 +38,8 @@ init_db()
 
 st.markdown("""
 <style>
-/* ── Load Material Symbols font to prevent fallback text rendering ── */
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0');
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+/* Inter font only — do NOT import Material Icons/Symbols.
+   When those fonts fail to load they render raw ligature text as fallback. */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 /* ═══ 0. Colour tokens ═══ */
@@ -61,8 +60,6 @@ st.markdown("""
 }
 
 /* ═══ 1. Sidebar collapse button ═══ */
-/* ONLY style it — never hide children or override display,
-   that removes the clickable area and breaks Streamlit's JS handler */
 [data-testid="stSidebarCollapseButton"] button,
 [data-testid="collapsedControl"] button {
     background: var(--bg3) !important;
@@ -73,20 +70,30 @@ st.markdown("""
 [data-testid="collapsedControl"] svg {
     fill: var(--txt2) !important;
 }
-
-/* ═══ 2. Expander — fix "_arr" font-fallback text bleeding into label ═══ */
-/* The Material Symbols font sometimes fails to load; when it does the raw
-   ligature text ("_arrow_right_alt") bleeds over the expander label.
-   Fix: shrink the icon container to zero so no text can escape. */
-[data-testid="stExpanderToggleIcon"] {
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-    position: absolute !important;
-    opacity: 0 !important;
+/* Silence ANY Material Icons fallback text in the sidebar button.
+   font-size:0 is the only method that works before font load resolves. */
+[data-testid="stSidebarCollapseButton"] span,
+[data-testid="stSidebarCollapseButton"] [class*="material"],
+[data-testid="collapsedControl"] span,
+[data-testid="collapsedControl"] [class*="material"] {
+    font-size: 0 !important;
+    color: transparent !important;
+    line-height: 0 !important;
 }
-[data-testid="stExpanderToggleIcon"] * { display: none !important; }
-/* Summary row: flex so label sits left, chevron sits right */
+
+/* ═══ 2. Expander — fix Material Icons fallback text ═══ */
+/* font-size:0 is the only reliable method — works before AND after font load */
+[data-testid="stExpanderToggleIcon"] {
+    font-size: 0 !important;
+    line-height: 0 !important;
+    color: transparent !important;
+    user-select: none !important;
+}
+[data-testid="stExpanderToggleIcon"] * {
+    font-size: 0 !important;
+    color: transparent !important;
+}
+/* Summary: flex row — label left, CSS chevron right */
 [data-testid="stExpander"] summary {
     display: flex !important;
     align-items: center !important;
@@ -100,7 +107,6 @@ st.markdown("""
     font-size: 0.95rem !important;
     font-weight: 600 !important;
 }
-/* CSS chevron — drawn via pseudo-element, pushed to right */
 [data-testid="stExpander"] summary::after {
     content: '';
     flex-shrink: 0;
@@ -109,6 +115,7 @@ st.markdown("""
     border-bottom: 2px solid var(--green);
     transform: rotate(45deg);
     transition: transform 0.2s ease;
+    margin-left: 12px;
 }
 [data-testid="stExpander"] details[open] summary::after {
     transform: rotate(-135deg);
