@@ -59,7 +59,21 @@ st.markdown("""
     color-scheme: dark;
 }
 
-/* ═══ 1. Sidebar collapse button ═══ */
+/* ═══ 1. Sidebar + Expander icon fix ═══ */
+/* Use maximum specificity to beat Streamlit's own stylesheet */
+html body .stApp .material-symbols-rounded,
+html body .material-symbols-rounded,
+.material-symbols-rounded {
+    font-size: 0px !important;
+    width: 0px !important;
+    height: 0px !important;
+    display: inline-block !important;
+    overflow: hidden !important;
+    color: transparent !important;
+    line-height: 0 !important;
+    opacity: 0 !important;
+}
+/* Sidebar */
 [data-testid="stSidebarCollapseButton"] button,
 [data-testid="collapsedControl"] button {
     background: var(--bg3) !important;
@@ -67,52 +81,9 @@ st.markdown("""
     border-radius: 6px !important;
 }
 [data-testid="stSidebarCollapseButton"] svg,
-[data-testid="collapsedControl"] svg {
-    fill: var(--txt2) !important;
-}
-/* Nuke sidebar button icon text — position:absolute + every other method */
-[data-testid="stSidebarCollapseButton"] span,
-[data-testid="stSidebarCollapseButton"] [class*="material"],
-[data-testid="stSidebarCollapseButton"] [data-testid*="Icon"],
-[data-testid="collapsedControl"] span,
-[data-testid="collapsedControl"] [class*="material"],
-[data-testid="collapsedControl"] [data-testid*="Icon"] {
-    position: absolute !important;
-    visibility: hidden !important;
-    font-size: 0 !important;
-    color: transparent !important;
-    line-height: 0 !important;
-    overflow: hidden !important;
-    width: 0 !important;
-    height: 0 !important;
-    opacity: 0 !important;
-}
+[data-testid="collapsedControl"] svg { fill: var(--txt2) !important; }
 
-/* ═══ 2. Expander — nuke fallback icon text completely ═══ */
-/* The icon element is BEFORE the label in DOM order. position:absolute pulls
-   it out of flow so it can never push the label text sideways. Every other
-   technique (font-size, visibility, overflow) is added as belt-and-suspenders. */
-[data-testid="stExpanderToggleIcon"] {
-    position: absolute !important;
-    visibility: hidden !important;
-    overflow: hidden !important;
-    width: 0 !important;
-    height: 0 !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-[data-testid="stExpanderToggleIcon"] * {
-    position: absolute !important;
-    visibility: hidden !important;
-    font-size: 0 !important;
-    color: transparent !important;
-    overflow: hidden !important;
-    width: 0 !important;
-    height: 0 !important;
-}
-/* Summary must be position:relative so the absolute icon doesn't escape it */
+/* ═══ 2. Expander layout ═══ */
 [data-testid="stExpander"] summary {
     position: relative !important;
     display: flex !important;
@@ -120,20 +91,33 @@ st.markdown("""
     list-style: none !important;
 }
 [data-testid="stExpander"] summary::-webkit-details-marker { display: none !important; }
+[data-testid="stExpander"] summary > * {
+    /* kill any direct child that isn't the <p> label */
+    flex-shrink: 0;
+}
 [data-testid="stExpander"] summary p {
     margin: 0 !important;
     flex: 1 !important;
     color: var(--txt) !important;
     font-size: 0.95rem !important;
     font-weight: 600 !important;
+    order: 1 !important;
 }
-/* Our own chevron via pseudo-element */
+/* Force icon span to order:0 (before label) but with zero footprint */
+[data-testid="stExpander"] summary span {
+    order: 0 !important;
+    font-size: 0px !important;
+    width: 0px !important;
+    height: 0px !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+}
 [data-testid="stExpander"] summary::after {
     content: '';
+    order: 2 !important;
     flex-shrink: 0;
     display: block;
-    width: 7px;
-    height: 7px;
+    width: 7px; height: 7px;
     border-right: 2px solid var(--green);
     border-bottom: 2px solid var(--green);
     transform: rotate(45deg);
@@ -470,6 +454,10 @@ SLOT_CFG = {
 #  SIDEBAR
 # ══════════════════════════════════════════════════════════════════════════════
 def _sidebar():
+    pass
+
+
+def _sidebar():
     with st.sidebar:
         _lang_toggle("sb")
         st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
@@ -722,6 +710,33 @@ if not ss.get("week_plan"):
             weakness_between=ss.get("weakness_between",False),
             bmi=ss.get("bmi"), diabetes_type=ss.get("diabetes_type","Type 2"))
 
+
+# Late CSS injection — appears after Streamlit's own styles in DOM, guaranteed to win
+st.markdown("""
+<style>
+html body .material-symbols-rounded,
+html body span.material-symbols-rounded {
+    font-size: 0px !important;
+    width: 0px !important;
+    height: 0px !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    color: transparent !important;
+    display: inline-block !important;
+}
+[data-testid="stExpanderToggleIcon"],
+[data-testid="stExpanderToggleIcon"] * {
+    font-size: 0px !important;
+    width: 0px !important;
+    height: 0px !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    color: transparent !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 tabs = st.tabs([t("tab_plan"), t("tab_chat"), t("tab_glucose"), t("tab_dashboard")])
 
 
@@ -753,7 +768,7 @@ with tabs[0]:
             ss["editing_profile"] = not ss.get("editing_profile",False); st.rerun()
 
     if ss.get("editing_profile"):
-        with st.expander("Edit Profile" if _lang()=="en" else "پروفائل تبدیل کریں", expanded=True):
+        if True:  # was st.expander — removed to fix Material Icons icon bug
             ef1, ef2 = st.columns(2)
             with ef1:
                 en  = st.text_input(t("pf_name"), value=ss.get("name",""), key="e_name")
@@ -786,7 +801,11 @@ with tabs[0]:
             with ef_2: ehyp = st.checkbox(t("q_hypo"),     value=ss.get("hypo_episodes",False),    key="e_hyp",help=t("q_hypo_help"))
             with ef_3: ewkn = st.checkbox(t("q_weakness"), value=ss.get("weakness_between",False), key="e_wkn",help=t("q_weakness_help"))
 
-            with st.expander("Add recent test results (optional)" if _lang()=="en" else "حالیہ ٹیسٹ کے نتائج شامل کریں (اختیاری)"):
+            adv_key = "show_adv_" + str(ss.get("user_key",""))[:8]
+            if adv_key not in ss: ss[adv_key] = False
+            if st.button("➕ " + ("Add recent test results (optional)" if _lang()=="en" else "حالیہ ٹیسٹ کے نتائج شامل کریں"), key="adv_tog", use_container_width=False):
+                ss[adv_key] = not ss[adv_key]; st.rerun()
+            if ss.get(adv_key, False):
                 st.caption(t("pf_advanced_note"))
                 a1,a2,a3 = st.columns(3)
                 with a1:
@@ -881,31 +900,68 @@ with tabs[0]:
         ss["prefer_desi"] = prefer_desi; ss["veg_only"] = veg_only
 
         days  = _plan_days(); slots = _plan_slots(); lg = _lang()
+        # Manual accordion — no st.expander() so no Material Icons fallback text
+        if "open_days" not in ss:
+            ss["open_days"] = set()
+
         for day in days:
             day_carbs = sum(day[s]["carb_servings"]*CARB["carb_serving_grams"] for s in slots if s in day)
-            day_label = (f"Day {day['day']}  ·  ~{day_carbs:.0f}g {t('carbs_label')}"
+            day_num   = day["day"]
+            is_open   = day_num in ss["open_days"]
+            arrow     = "▲" if is_open else "▼"
+            day_label = (f"Day {day_num}  ·  ~{day_carbs:.0f}g {t('carbs_label')}"
                          if _lang()=="en" else
-                         f"دن {day['day']}  ·  ~{day_carbs:.0f}g {t('carbs_label')}")
-            with st.expander(day_label):
-                for slot in slots:
-                    if slot not in day: continue
-                    meal = day[slot]
-                    ico, le, lu = SLOT_CFG.get(slot,("🍽️",slot.title(),slot.title()))
-                    lbl = le if lg=="en" else lu
-                    cg  = meal["carb_servings"] * CARB["carb_serving_grams"]
-                    st.markdown(f'<p class="meal-slot">{ico} {lbl}</p>', unsafe_allow_html=True)
-                    st.markdown(f"**{meal['name']}**")
-                    st.caption(f"~{cg}g carbs · {meal['notes']}")
-                    st.markdown('<div style="height:4px"></div>', unsafe_allow_html=True)
+                         f"دن {day_num}  ·  ~{day_carbs:.0f}g {t('carbs_label')}")
 
-                sw_c, _ = st.columns([1,3])
-                with sw_c:
-                    if st.button(t("swaps_btn"), key=f"sw_{day['day']}", use_container_width=True):
-                        names = [day[s]["name"] for s in slots if s in day]
-                        with st.spinner(t("getting_swaps")):
-                            swaps = generate_swaps("; ".join(names))
-                        st.markdown(f"**{t('swaps_heading')}**")
-                        for s in swaps: st.write("•", s)
+            # Header row — plain button, no expander
+            st.markdown(
+                f'<div style="background:var(--bg2);border:1px solid var(--border);'
+                f'border-radius:10px;padding:2px 4px;margin-bottom:6px;">'
+                f'</div>', unsafe_allow_html=True)
+            hcol, acol = st.columns([9, 1])
+            with hcol:
+                st.markdown(
+                    f'<div style="padding:10px 14px;font-weight:600;font-size:0.96rem;'
+                    f'color:var(--txt);">📅 {day_label}</div>',
+                    unsafe_allow_html=True)
+            with acol:
+                if st.button(arrow, key=f"day_tog_{day_num}"):
+                    if is_open:
+                        ss["open_days"].discard(day_num)
+                    else:
+                        ss["open_days"].add(day_num)
+                    st.rerun()
+
+            # Content — only shown when open
+            if is_open:
+                with st.container():
+                    st.markdown(
+                        '<div style="background:var(--bg2);border:1px solid var(--border);'
+                        'border-top:none;border-radius:0 0 10px 10px;padding:14px 18px;'
+                        'margin-top:-6px;margin-bottom:10px;">',
+                        unsafe_allow_html=True)
+                    for slot in slots:
+                        if slot not in day: continue
+                        meal = day[slot]
+                        ico, le, lu = SLOT_CFG.get(slot,("🍽️",slot.title(),slot.title()))
+                        lbl = le if lg=="en" else lu
+                        cg  = meal["carb_servings"] * CARB["carb_serving_grams"]
+                        st.markdown(f'<p class="meal-slot">{ico} {lbl}</p>', unsafe_allow_html=True)
+                        st.markdown(f"**{meal['name']}**")
+                        st.caption(f"~{cg}g carbs · {meal['notes']}")
+                        st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
+                    sw_c, _ = st.columns([1,3])
+                    with sw_c:
+                        if st.button(t("swaps_btn"), key=f"sw_{day_num}", use_container_width=True):
+                            names = [day[s]["name"] for s in slots if s in day]
+                            with st.spinner(t("getting_swaps")):
+                                swaps = generate_swaps("; ".join(names))
+                            st.markdown(f"**{t('swaps_heading')}**")
+                            for s in swaps: st.write("•", s)
+            else:
+                st.markdown('<div style="margin-bottom:4px;"></div>', unsafe_allow_html=True)
+
 
     st.divider()
 
@@ -1062,7 +1118,9 @@ with tabs[3]:
         plt.xticks(rotation=30, fontsize=8); plt.tight_layout()
         st.pyplot(fig); plt.rcParams.update(plt.rcParamsDefault)
         st.caption(t("trend_note"))
-        with st.expander("View all readings" if _lang()=="en" else "تمام ریڈنگز دیکھیں"):
+        if st.button("📋 " + ("View all readings" if _lang()=="en" else "تمام ریڈنگز دیکھیں"), key="tog_readings"):
+            ss["show_all_readings"] = not ss.get("show_all_readings", False); st.rerun()
+        if ss.get("show_all_readings", False):
             st.dataframe(df.rename(columns={"measured_at":t("col_time"),"type":t("col_type"),
                                             "value":t("col_val"),"meal_note":t("col_note")}),
                          use_container_width=True)
