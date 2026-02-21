@@ -419,6 +419,68 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
 
 /* ── Footer ── */
 .footer { font-size:0.78rem; color:var(--txt3) !important; text-align:center; padding:12px 0; border-top:1px solid var(--border); margin-top:32px; }
+
+/* ── FINAL FIX: hide Streamlit icon ligature text (sidebar + expander) ── */
+
+/* 1) Sidebar collapsed/expanded control text like "double_arrow_right" */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="collapsedControl"] {
+    font-size: 0 !important;      /* hides raw text nodes */
+    line-height: 0 !important;
+    color: transparent !important;
+}
+
+/* Keep actual button clickable, but hide built-in icon/text visually */
+[data-testid="stSidebarCollapseButton"] button,
+[data-testid="collapsedControl"] button {
+    font-size: 0 !important;
+    line-height: 0 !important;
+    color: transparent !important;
+    text-indent: -9999px !important;   /* extra safety for ligature text */
+    overflow: hidden !important;
+}
+
+/* Hide any fallback material icon text/svg inside */
+[data-testid="stSidebarCollapseButton"] .material-icons,
+[data-testid="stSidebarCollapseButton"] .material-symbols-rounded,
+[data-testid="collapsedControl"] .material-icons,
+[data-testid="collapsedControl"] .material-symbols-rounded,
+[data-testid="stSidebarCollapseButton"] svg,
+[data-testid="collapsedControl"] svg {
+    display: none !important;
+}
+
+
+/* 2) Expander header jumbled text like "_arr..." */
+[data-testid="stExpander"] summary {
+    font-size: 0 !important;      /* hides raw ligature text rendered by Streamlit */
+    line-height: 0 !important;
+}
+
+/* Remove native icon/fallbacks completely */
+[data-testid="stExpander"] summary svg,
+[data-testid="stExpander"] summary .material-icons,
+[data-testid="stExpander"] summary .material-symbols-rounded,
+[data-testid="stExpander"] summary [class*="material"] {
+    display: none !important;
+}
+
+/* If Streamlit injects a default pseudo-icon, kill it */
+[data-testid="stExpander"] summary::before {
+    content: none !important;
+    display: none !important;
+}
+
+/* Restore normal text size ONLY for the real expander label */
+[data-testid="stExpander"] summary p,
+[data-testid="stExpander"] summary [data-testid="stMarkdownContainer"],
+[data-testid="stExpander"] summary [data-testid="stMarkdownContainer"] * {
+    font-size: 0.95rem !important;
+    line-height: 1.3 !important;
+    color: var(--txt) !important;
+    font-weight: 600 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
