@@ -63,71 +63,98 @@ st.markdown("""
     color-scheme: dark;
 }
 
-/* ═══ 1. Sidebar collapse button — FLEXBOX FIX ═══ */
-/* Nuke Streamlit's inner text/SVGs completely */
-[data-testid="stSidebarCollapseButton"] *,
-[data-testid="collapsedControl"] * {
-    display: none !important;
-}
-/* Turn the button into a clean, centered flex container */
-[data-testid="stSidebarCollapseButton"],
-[data-testid="collapsedControl"] {
+/* ═══ 1. Sidebar collapse button — FIXED (keeps button clickable) ═══ */
+
+/* Style the actual clickable button, not the wrapper */
+[data-testid="stSidebarCollapseButton"] button,
+[data-testid="collapsedControl"] button {
+    background: transparent !important;
+    border: none !important;
     color: transparent !important;
+    font-size: 0 !important;              /* hides fallback icon text */
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    padding: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    cursor: pointer !important;
 }
-/* Draw CSS left arrow */
-[data-testid="stSidebarCollapseButton"]::after {
+
+/* Hide Streamlit’s built-in icon/text inside the button only */
+[data-testid="stSidebarCollapseButton"] button > *,
+[data-testid="collapsedControl"] button > * {
+    display: none !important;
+}
+
+/* Draw custom arrows */
+[data-testid="stSidebarCollapseButton"] button::before {
     content: '';
-    width: 8px; height: 8px;
+    width: 8px;
+    height: 8px;
     border-left: 2px solid var(--txt2);
     border-bottom: 2px solid var(--txt2);
     transform: rotate(45deg);
-    display: block !important;
+    display: block;
 }
-/* Draw CSS right arrow */
-[data-testid="collapsedControl"]::after {
+
+[data-testid="collapsedControl"] button::before {
     content: '';
-    width: 8px; height: 8px;
+    width: 8px;
+    height: 8px;
     border-right: 2px solid var(--txt2);
     border-bottom: 2px solid var(--txt2);
     transform: rotate(-45deg);
-    display: block !important;
+    display: block;
 }
 
-/* ═══ 2. Expander arrow — FLEXBOX FIX ═══ */
-/* Completely delete Streamlit's buggy icon container from the DOM layout */
-[data-testid="stExpanderToggleIcon"] {
+
+/* ═══ 2. Expander arrow — FIXED (removes jumbled icon text) ═══ */
+
+/* Hide Streamlit’s native expander icon/fallback text safely */
+[data-testid="stExpander"] summary svg,
+[data-testid="stExpander"] summary .material-symbols-rounded,
+[data-testid="stExpander"] summary .material-icons,
+[data-testid="stExpander"] summary [aria-hidden="true"] {
     display: none !important;
 }
-/* Force the summary row to be a proper flex container */
+
+/* Make summary row clean and aligned */
 [data-testid="stExpander"] summary {
     display: flex !important;
     align-items: center !important;
-    list-style: none !important; 
+    list-style: none !important;
+    gap: 8px !important;
 }
+
 [data-testid="stExpander"] summary::-webkit-details-marker {
     display: none !important;
 }
-/* Draw CSS down arrow and push it all the way to the right side natively */
+
+/* Custom arrow on the right */
 [data-testid="stExpander"] summary::after {
     content: '';
-    width: 8px; height: 8px;
+    width: 8px;
+    height: 8px;
     border-right: 2px solid var(--green);
     border-bottom: 2px solid var(--green);
     transform: rotate(45deg);
     transition: transform 0.2s ease;
-    margin-left: auto !important; /* This flex property guarantees it stays on the far right */
+    margin-left: auto !important;
     display: block !important;
     flex-shrink: 0 !important;
 }
-/* Rotate arrow up when open */
-[data-testid="stExpander"] details[open] summary::after {
+
+/* Rotate when open (supports different Streamlit DOM versions) */
+[data-testid="stExpander"][open] summary::after,
+[data-testid="stExpander"] details[open] > summary::after {
     transform: rotate(-135deg);
     margin-top: 4px;
 }
-/* Ensure the text label renders correctly */
+
+/* Keep label text clean */
 [data-testid="stExpander"] summary p {
     margin: 0 !important;
     padding-right: 12px !important;
@@ -135,6 +162,7 @@ st.markdown("""
     font-size: 0.95rem !important;
     font-weight: 600 !important;
 }
+
 
 /* ═══ 3. Base ═══ */
 html, body { background:var(--bg) !important; font-family:'Inter',sans-serif !important; }
