@@ -23,7 +23,13 @@ def _model() -> str:
     return os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
 
-def _fallback() -> List[str]:
+def _fallback(lang: str = "en") -> List[str]:
+    if lang == "ur":
+        return [
+            "سبزیوں کی مقدار بڑھائیں — اضافی کاربس کے بغیر پیٹ بھرتا ہے۔",
+            "میدے کی روٹی کی جگہ گندم کی آٹے کی روٹی کھائیں۔",
+            "میٹھے کے بغیر دہی شامل کریں — پروٹین ملتا ہے اور شوگر نہیں بڑھتی۔",
+        ]
     return [
         "Increase vegetable portion to add volume without extra carbs.",
         "Choose whole wheat roti instead of white flour roti.",
@@ -132,15 +138,25 @@ def chat_with_assistant(
 
 # ── SWAP SUGGESTIONS ──────────────────────────────────────────────────────────
 
-def generate_swaps(meal_text: str) -> List[str]:
-    """Returns 3 healthy swap suggestions for a given meal."""
+def generate_swaps(meal_text: str, lang: str = "en") -> List[str]:
+    """
+    Returns 3 healthy swap suggestions for a given meal.
+    lang: "en" or "ur" — response language for suggestions
+    """
     client = _client()
     if client is None:
-        return _fallback()
+        return _fallback(lang)
+
+    lang_instruction = (
+        "Respond in Urdu script only." if lang == "ur"
+        else "Respond in English."
+    )
+
     prompt = (
         "Return exactly 3 safe, non-medical healthy swap suggestions for the meal below. "
         "Focus on South Asian / Pakistani desi food context. "
         "No medication advice. Keep it practical and specific. "
+        f"{lang_instruction} "
         "Respond ONLY as a JSON array of 3 strings, no other text.\n\n"
         f"Meal: {meal_text}"
     )
@@ -157,21 +173,31 @@ def generate_swaps(meal_text: str) -> List[str]:
             return data[:3]
     except Exception:
         pass
-    return _fallback()
+    return _fallback(lang)
 
 
 # ── DEVIATION COACHING ────────────────────────────────────────────────────────
 
-def coach_on_actual_meal(actual_meal_text: str) -> List[str]:
-    """Friendly coaching when a user deviated from their plan."""
+def coach_on_actual_meal(actual_meal_text: str, lang: str = "en") -> List[str]:
+    """
+    Friendly coaching when a user deviated from their plan.
+    lang: "en" or "ur" — response language for coaching tips
+    """
     client = _client()
     if client is None:
-        return _fallback()
+        return _fallback(lang)
+
+    lang_instruction = (
+        "Respond in Urdu script only." if lang == "ur"
+        else "Respond in English."
+    )
+
     prompt = (
         "A diabetes patient ate these foods instead of their plan. "
         "Give exactly 3 kind, practical tips on portion control, carb awareness, "
         "and healthier preparation for South Asian foods. "
         "No medication advice. Be encouraging, not judgmental. "
+        f"{lang_instruction} "
         "Respond ONLY as a JSON array of 3 strings, no other text.\n\n"
         f"Foods eaten: {actual_meal_text}"
     )
@@ -188,4 +214,4 @@ def coach_on_actual_meal(actual_meal_text: str) -> List[str]:
             return data[:3]
     except Exception:
         pass
-    return _fallback()
+    return _fallback(lang)
