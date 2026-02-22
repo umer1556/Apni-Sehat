@@ -127,6 +127,22 @@ st.markdown("""
     margin-left: -4px !important;
 }
 
+/* collapsedControl lives outside the sidebar in the main page DOM.
+   Target every possible child element that could carry the ligature text. */
+[data-testid="collapsedControl"] button *,
+[data-testid="collapsedControl"] button span,
+[data-testid="collapsedControl"] button p,
+[data-testid="collapsedControl"] span {
+    font-size: 0 !important;
+    color: transparent !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    opacity: 0 !important;
+    display: block !important;
+}
+
 [data-testid="stSidebarCollapseButton"] button:hover::after,
 [data-testid="collapsedControl"] button:hover::after {
     border-color: var(--green) !important;
@@ -438,6 +454,11 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
 .sb-disc-title { font-size:1.15rem !important; font-weight:700 !important; color:var(--amber) !important; margin-bottom:6px !important; }
 
 .meal-slot { font-size:1.15rem; font-weight:700; color:var(--green) !important; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:2px; }
+.day-pill-active { background:var(--green); color:#0a1a0f; border-radius:8px; padding:10px 4px; font-family:'Inter',sans-serif; font-size:1rem; font-weight:700; text-align:center; width:100%; box-sizing:border-box; cursor:default; }
+.day-summary-bar { background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--green); border-radius:8px; padding:13px 20px; margin-bottom:16px; font-weight:700; font-size:1.12rem; color:var(--txt); font-family:'Inter',sans-serif; }
+.swap-result-card { background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--green); border-radius:8px; padding:18px 22px; margin-top:12px; }
+.swap-result-heading { font-weight:700; color:var(--green); font-size:1.05rem; margin-bottom:12px; font-family:'Inter',sans-serif; }
+.swap-result-item { padding:8px 0; border-bottom:1px solid var(--border); color:var(--txt); font-size:1rem; line-height:1.65; font-family:'Inter',sans-serif; }
 .meal-card { background:var(--bg2); border:1px solid var(--border); border-top:3px solid var(--green); border-radius:10px; padding:18px 20px; margin-bottom:12px; font-family:'Inter',sans-serif; }
 .meal-card-slot { font-size:0.9rem; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px; font-family:'Inter',sans-serif; }
 .meal-card-name { font-size:1.15rem; font-weight:700; color:var(--txt); line-height:1.6; margin-bottom:10px; font-family:'Inter',sans-serif; }
@@ -449,8 +470,6 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
     border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:14px;
 }
 
-.apni-day-hidden { position:absolute; opacity:0; pointer-events:none; height:0; overflow:hidden; }
-.apni-day-hidden * { height:0 !important; min-height:0 !important; padding:0 !important; margin:0 !important; }
 .footer { font-size:0.95rem; color:var(--txt3) !important; text-align:center; padding:12px 0; border-top:1px solid var(--border); margin-top:32px; }
 </style>
 """, unsafe_allow_html=True)
@@ -956,162 +975,80 @@ with tabs[0]:
 
         days  = _plan_days(); slots = _plan_slots(); lg = _lang()
 
-        # ── Pure HTML/JS meal plan — zero st.rerun(), instant day switching ──
-        def _card_html(slot, meal, lg_):
-            ico, le, lu = SLOT_CFG.get(slot, ("🍽️", slot.title(), slot.title()))
-            lbl = le if lg_ == "en" else lu
-            cg  = meal["carb_servings"] * CARB["carb_serving_grams"]
-            return (
-                '<div class="meal-card">'
-                f'<div class="meal-card-slot">{ico} {lbl}</div>'
-                f'<div class="meal-card-name">{meal["name"]}</div>'
-                f'<div class="meal-card-meta">~{cg}g carbs</div>'
-                f'<div class="meal-card-note">{meal["notes"]}</div>'
-                '</div>'
-            )
+        # ── Day selector ─────────────────────────────────────────────────────
+        if "selected_day" not in ss:
+            ss["selected_day"] = 1
+        sel = ss["selected_day"]
 
-        btn_parts  = []
-        days_parts = []
+        # Row of 7 day buttons — active one styled green via CSS, others muted
+        btn_cols = st.columns(7)
+        for i, day_item in enumerate(days):
+            dnum  = day_item["day"]
+            label = f"Day {dnum}" if lg == "en" else f"دن {dnum}"
+            with btn_cols[i]:
+                if dnum == sel:
+                    st.markdown(
+                        f'<div class="day-pill-active">{label}</div>',
+                        unsafe_allow_html=True
+                    )
+                else:
+                    if st.button(label, key=f"dp_{dnum}", use_container_width=True):
+                        ss["selected_day"] = dnum
+                        st.rerun()
 
-        for i, day in enumerate(days):
-            dnum     = day["day"]
-            d_carbs  = sum(day[s]["carb_servings"]*CARB["carb_serving_grams"] for s in slots if s in day)
-            dlabel   = f"Day {dnum}" if lg == "en" else f"\u062f\u0646 {dnum}"
-            summary  = (f"\U0001f4c5 Day {dnum}  \u00b7  ~{d_carbs:.0f}g {t('carbs_label')}"
-                        if lg == "en" else
-                        f"\U0001f4c5 \u062f\u0646 {dnum}  \u00b7  ~{d_carbs:.0f}g {t('carbs_label')}")
-            active   = ' active' if i == 0 else ''
-            display  = 'block' if i == 0 else 'none'
+        st.markdown('<div style="height:10px"></div>', unsafe_allow_html=True)
 
-            btn_parts.append(
-                f'<button class="day-btn{active}" onclick="apniSelectDay({dnum},this)">'
-                f'{dlabel}</button>'
-            )
-
-            meal_items = [(s, day[s]) for s in slots if s in day]
-            cards = "".join(_card_html(s, m, lg) for s, m in meal_items)
-
-            swap_lbl = "💡 Suggest swaps" if lg == "en" else "💡 متبادل تجویز کریں"
-            days_parts.append(
-                f'<div class="day-panel" id="apni-day-{dnum}" style="display:{display}">'
-                f'<div class="day-summary-bar">{summary}</div>'
-                f'<div class="meal-grid">{cards}</div>'
-                f'<button class="swap-btn" onclick="apniRequestSwap({dnum})"'
-                f' id="swap-btn-{dnum}">{swap_lbl}</button>'
-                f'</div>'
-            )
-
-        plan_css = (
-            "<style>"
-            ".day-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}"
-            ".day-btn{flex:1;min-width:52px;padding:11px 4px;"
-            "background:#161b22;color:#8b949e;"
-            "border:1px solid #30363d;border-radius:8px;"
-            "font-family:'Inter',sans-serif;font-size:1rem;font-weight:600;"
-            "cursor:pointer;transition:all 0.12s ease;white-space:nowrap;}"
-            ".day-btn:hover{border-color:#3fb950;color:#3fb950;}"
-            ".day-btn.active{background:#3fb950;color:#0a1a0f;"
-            "border-color:#3fb950;font-weight:700;}"
-            ".day-summary-bar{background:#161b22;border:1px solid #30363d;"
-            "border-left:3px solid #3fb950;border-radius:8px;"
-            "padding:13px 20px;margin-bottom:16px;"
-            "font-weight:700;font-size:1.12rem;color:#e6edf3;"
-            "font-family:'Inter',sans-serif;}"
-            ".meal-grid{display:grid;grid-template-columns:repeat(2,1fr);"
-            "gap:12px;margin-bottom:4px;}"
-            "@media(max-width:600px){.meal-grid{grid-template-columns:1fr;}}"
-            ".meal-card{background:#161b22;border:1px solid #30363d;"
-            "border-top:3px solid #3fb950;border-radius:10px;"
-            "padding:16px 18px;font-family:'Inter',sans-serif;}"
-            ".meal-card-slot{font-size:0.9rem;font-weight:700;"
-            "color:#3fb950;text-transform:uppercase;"
-            "letter-spacing:0.1em;margin-bottom:7px;}"
-            ".meal-card-name{font-size:1.12rem;font-weight:700;"
-            "color:#e6edf3;line-height:1.55;margin-bottom:8px;}"
-            ".meal-card-meta{display:inline-block;"
-            "background:rgba(63,185,80,0.15);color:#3fb950;"
-            "border:1px solid #3fb950;border-radius:4px;"
-            "padding:3px 10px;font-size:0.92rem;font-weight:700;margin-bottom:8px;}"
-            ".meal-card-note{font-size:1.02rem;color:#9ca3af;line-height:1.78;}"
-            ".swap-btn{display:block;width:100%;margin-top:14px;padding:12px 0;"
-            "background:transparent;color:#3fb950;"
-            "border:1px solid #3fb950;border-radius:8px;"
-            "font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;"
-            "cursor:pointer;transition:all 0.15s ease;letter-spacing:0.02em;}"
-            ".swap-btn:hover{background:rgba(63,185,80,0.12);}"
-            "</style>"
-        )
-
-        plan_js = (
-            "<script>"
-            "var _apniDay=1;"
-            "function apniSelectDay(dnum,btn){"
-            "_apniDay=dnum;"
-            "document.querySelectorAll('.day-panel').forEach(function(p){p.style.display='none';});"
-            "document.querySelectorAll('.day-btn').forEach(function(b){b.classList.remove('active');});"
-            "var p=document.getElementById('apni-day-'+dnum);"
-            "if(p)p.style.display='block';"
-            "btn.classList.add('active');"
-            "var hi=window.parent.document.querySelector('.apni-day-hidden input');"
-            "if(hi){hi.value=dnum;hi.dispatchEvent(new Event('input',{bubbles:true}));"
-            "hi.dispatchEvent(new Event('change',{bubbles:true}));}"
-            "}"
-            "function apniRequestSwap(dnum){"
-            "var hi=window.parent.document.querySelector('.apni-day-hidden input');"
-            "if(hi){hi.value=dnum;hi.dispatchEvent(new Event('input',{bubbles:true}));"
-            "hi.dispatchEvent(new Event('change',{bubbles:true}));}"
-            "setTimeout(function(){"
-            "var sb=window.parent.document.querySelector('.apni-swap-btn button');"
-            "if(sb)sb.click();"
-            "},150);}"
-            "</script>"
-        )
-
+        # ── Selected day content ──────────────────────────────────────────────
+        day       = days[sel - 1]
+        day_carbs = sum(day[s]["carb_servings"]*CARB["carb_serving_grams"] for s in slots if s in day)
+        summary   = (f"📅 Day {sel}  ·  ~{day_carbs:.0f}g {t('carbs_label')}"
+                     if lg == "en" else
+                     f"📅 دن {sel}  ·  ~{day_carbs:.0f}g {t('carbs_label')}")
         st.markdown(
-            plan_css
-            + '<div class="day-strip">' + "".join(btn_parts) + '</div>'
-            + "".join(days_parts)
-            + plan_js,
+            f'<div class="day-summary-bar">{summary}</div>',
             unsafe_allow_html=True
         )
 
-        # ── Swap suggestions — "💡 Suggest swaps" lives inside each day panel ────
-        # JS updates .apni-day-hidden input with the clicked day, then clicks .apni-swap-btn
-        # We wrap both in st.markdown div containers that JS can find by class
+        # ── Meal cards — 2 per row ────────────────────────────────────────────
+        meal_items = [(s, day[s]) for s in slots if s in day]
+        for row_start in range(0, len(meal_items), 2):
+            row  = meal_items[row_start : row_start + 2]
+            cols = st.columns(len(row))
+            for col, (slot, meal) in zip(cols, row):
+                ico, le, lu = SLOT_CFG.get(slot, ("🍽️", slot.title(), slot.title()))
+                lbl = le if lg == "en" else lu
+                cg  = meal["carb_servings"] * CARB["carb_serving_grams"]
+                with col:
+                    st.markdown(
+                        f'<div class="meal-card">'
+                        f'<div class="meal-card-slot">{ico} {lbl}</div>'
+                        f'<div class="meal-card-name">{meal["name"]}</div>'
+                        f'<div class="meal-card-meta">~{cg:.0f}g carbs</div>'
+                        f'<div class="meal-card-note">{meal["notes"]}</div>'
+                        f'</div>',
+                        unsafe_allow_html=True
+                    )
 
-        # Hidden day number receiver
-        st.markdown('<div class="apni-day-hidden">', unsafe_allow_html=True)
-        swap_trigger_day = st.number_input(
-            "_swap_trigger", min_value=1, max_value=7, value=1,
-            step=1, key="swap_trigger_day",
-            label_visibility="collapsed"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        # Hidden trigger button (JS clicks this)
-        st.markdown('<div class="apni-swap-btn" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden;">', unsafe_allow_html=True)
-        _do_swap = st.button("⚡", key="sw_hidden_btn")
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        if _do_swap:
-            day_for_swap = days[int(swap_trigger_day) - 1]
-            names = [day_for_swap[s]["name"] for s in slots if s in day_for_swap]
-            day_lbl = f"Day {int(swap_trigger_day)}" if lg == "en" else f"دن {int(swap_trigger_day)}"
-            with st.spinner(t("getting_swaps")):
-                swaps = generate_swaps("; ".join(names))
-            st.markdown(
-                f'<div style="background:var(--bg2);border:1px solid var(--border);'
-                f'border-left:3px solid var(--green);border-radius:8px;padding:18px 22px;margin-top:12px;">'
-                f'<div style="font-weight:700;color:var(--green);font-size:1.05rem;margin-bottom:12px;">'
-                f'💡 {t("swaps_heading")} — {day_lbl}</div>'
-                + "".join(
-                    f'<div style="padding:8px 0;border-bottom:1px solid var(--border);'
-                    f'color:var(--txt);font-size:1rem;line-height:1.65;">• {s}</div>'
-                    for s in swaps
+        # ── Swap button — one button, right under the cards ───────────────────
+        st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
+        sw_col, _ = st.columns([2, 3])
+        with sw_col:
+            if st.button(t("swaps_btn"), key=f"sw_{sel}", use_container_width=True):
+                names = [day[s]["name"] for s in slots if s in day]
+                with st.spinner(t("getting_swaps")):
+                    swaps = generate_swaps("; ".join(names))
+                day_lbl = f"Day {sel}" if lg == "en" else f"دن {sel}"
+                st.markdown(
+                    f'<div class="swap-result-card">'
+                    f'<div class="swap-result-heading">💡 {t("swaps_heading")} — {day_lbl}</div>'
+                    + "".join(
+                        f'<div class="swap-result-item">• {s}</div>'
+                        for s in swaps
+                    )
+                    + '</div>',
+                    unsafe_allow_html=True
                 )
-                + '</div>',
-                unsafe_allow_html=True
-            )
+
 
     st.divider()
 
