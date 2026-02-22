@@ -454,21 +454,6 @@ hr { border-color: var(--border) !important; }
     border-color: var(--green) !important;
     color: var(--green) !important;
 }
-.day-pill-active .stButton > button {
-    width: 100% !important;
-    text-align: center !important;
-    justify-content: center !important;
-    font-size: 0.88rem !important;
-    font-weight: 700 !important;
-    padding: 10px 6px !important;
-    min-height: 56px !important;
-    background: var(--green2) !important;
-    border: 2px solid var(--green) !important;
-    border-radius: 10px !important;
-    color: #fff !important;
-    letter-spacing: 0 !important;
-    line-height: 1.4 !important;
-}
 .section-label {
     font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--txt3);
     text-transform: uppercase; letter-spacing: 0.1em;
@@ -486,7 +471,7 @@ hr { border-color: var(--border) !important; }
 # ── Helpers ───────────────────────────────────────────────────────────────────
 ss = st.session_state
 
-# ── NEW: Lightweight direct LLM caller ───────────────────────────────────────
+# ── Lightweight direct LLM caller ─────────────────────────────────────────────
 def _call_llm(system: str, user: str, max_tokens: int = 400) -> str:
     try:
         from openai import OpenAI
@@ -505,7 +490,7 @@ def _call_llm(system: str, user: str, max_tokens: int = 400) -> str:
     except Exception as e:
         return f"[AI unavailable: {e}]"
 
-# ── NEW: RAG knowledge base (ADA 2024, WHO/IDF South Asian, Pakistan NCD) ────
+# ── RAG knowledge base ────────────────────────────────────────────────────────
 _RAG_KB = {
     "carbohydrates": {
         "keywords": ["carb","carbohydrate","sugar","glucose","roti","rice","bread","atta","starch","grams"],
@@ -591,7 +576,6 @@ _RAG_KB = {
 }
 
 def _rag_retrieve(query: str, top_k: int = 2) -> list:
-    """Keyword-based retrieval. Returns top_k most relevant chunks."""
     q = query.lower()
     scored = sorted(
         [(sum(1 for kw in c["keywords"] if kw in q), k, c)
@@ -660,11 +644,7 @@ def _plan_profile():
     p = ss.get("week_plan")
     return p.get("profile") if isinstance(p, dict) else None
 
-# ── Urdu translations for meal notes (from meal bank English notes) ──────────
-# Keys are exact English note strings returned by planner/meal_bank.
-# Values are Urdu translations for display when lg == "ur".
 _NOTES_UR = {
-    # Breakfast
     "High protein and fibre. Very gentle on blood sugar.": "زیادہ پروٹین اور فائبر۔ بلڈ شوگر کے لیے بہت محفوظ۔",
     "High protein, slow-digesting. Keeps you full longer.": "زیادہ پروٹین، آہستہ ہضم ہوتا ہے۔ دیر تک پیٹ بھرا رہتا ہے۔",
     "High fibre, low GI. Add nuts for protein.": "زیادہ فائبر، کم گلائسیمک انڈیکس۔ گری دار میوے شامل کریں۔",
@@ -673,7 +653,6 @@ _NOTES_UR = {
     "Good fats + protein. Very low carb impact.": "اچھی چکنائی اور پروٹین۔ کاربس کا بہت کم اثر۔",
     "Low GI, high fibre. Very filling.": "کم GI، زیادہ فائبر۔ بہت پیٹ بھرنے والا۔",
     "Anti-inflammatory. Good fat. Very low carb.": "سوزش کم کرتا ہے۔ اچھی چکنائی۔ کاربس بہت کم۔",
-    # Snacks
     "High protein, no carbs. Very blood-sugar safe.": "زیادہ پروٹین، کاربس نہیں۔ بلڈ شوگر کے لیے بالکل محفوظ۔",
     "Slow digesting protein + fat. No sugar spike.": "آہستہ ہضم ہونے والا پروٹین اور چکنائی۔ شوگر نہیں بڑھتی۔",
     "Low GI. High protein and fibre.": "کم GI۔ زیادہ پروٹین اور فائبر۔",
@@ -686,7 +665,6 @@ _NOTES_UR = {
     "Complex carbs + protein. Prevents overnight dip.": "پیچیدہ کاربس اور پروٹین۔ رات میں شوگر گرنے سے بچاتا ہے۔",
     "Slow protein. Bedtime safe for insulin users.": "آہستہ پروٹین۔ انسولین استعمال کرنے والوں کے لیے سونے سے پہلے محفوظ۔",
     "Protein + fat. Stable overnight glucose.": "پروٹین اور چکنائی۔ رات بھر شوگر مستحکم رکھتا ہے۔",
-    # Lunch / Dinner
     "Chickpeas are excellent for blood sugar. Avoid too much oil.": "چنے بلڈ شوگر کے لیے بہترین ہیں۔ زیادہ تیل سے بچیں۔",
     "Legumes lower blood sugar. Keep roti to 1 medium.": "دالیں بلڈ شوگر کم کرتی ہیں۔ روٹی ایک درمیانی رکھیں۔",
     "Low GI daal. Protein rich. Avoid heavy tarka.": "کم GI دال۔ پروٹین سے بھرپور۔ بھاری تڑکے سے بچیں۔",
@@ -714,14 +692,13 @@ SLOT_CFG = {
     "snack":     ("🍎","Snack","ناشتہ"),
 }
 
+DAY_NAMES    = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+DAY_NAMES_UR = ["پیر","منگل","بدھ","جمعرات","جمعہ","ہفتہ","اتوار"]
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  SIDEBAR
 # ══════════════════════════════════════════════════════════════════════════════
-def _sidebar():
-    pass
-
-
 def _sidebar():
     with st.sidebar:
         _lang_toggle("sb")
@@ -897,7 +874,6 @@ if ss.get("setup_step") in (1, 2):
         )
         st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
 
-        # ── STEP 1: Name, age, gender, height, weight, diabetes type, food prefs ──
         if step == 1:
             name_v  = st.text_input(t("wizard_name"), value=ss.get("name",""))
             col_age, col_gen = st.columns(2)
@@ -929,7 +905,6 @@ if ss.get("setup_step") in (1, 2):
 
             st.divider()
 
-            # Diabetes type with "Not sure" warning
             d_opts  = ["Type 1", "Type 2", "Not sure / not diagnosed"]
             saved_d = ss.get("diabetes_type", "Type 2")
             d_idx   = d_opts.index(saved_d) if saved_d in d_opts else 1
@@ -964,7 +939,6 @@ if ss.get("setup_step") in (1, 2):
                     })
                     st.rerun()
 
-        # ── STEP 2: Conditions, meal habits ──────────────────────────────────────
         else:
             st.markdown("### Do you have any of the following conditions?")
             st.caption("Tick all that apply. If you have none, leave all unticked and click Finish.")
@@ -1009,7 +983,6 @@ if ss.get("setup_step") in (1, 2):
                     with st.spinner(t("wizard_saving")):
                         dtype = ss.get("diabetes_type", "Type 2")
 
-                        # "Not sure" diabetes → force AMBER + disclaimer flag
                         if dtype == "Not sure / not diagnosed":
                             ss["triage_level"] = "AMBER"
                             ss["triage_flags"] = [
@@ -1017,7 +990,6 @@ if ss.get("setup_step") in (1, 2):
                                 "Following a cautious low-GI plan until diagnosis is confirmed.",
                             ]
                         else:
-                            # Treat "Not sure" on BP/cholesterol conservatively (assume yes for safety)
                             _run_triage(dtype, hy or hy_ns, ch or ch_ns,
                                         other_major=other)
 
@@ -1080,10 +1052,6 @@ if not ss.get("week_plan"):
             weakness_between=ss.get("weakness_between",False),
             bmi=ss.get("bmi"), diabetes_type=ss.get("diabetes_type","Type 2"))
 
-
-# Late CSS injection — appears after Streamlit's own styles in DOM, guaranteed to win
-
-
 tabs = st.tabs([t("tab_plan"), t("tab_chat"), t("tab_glucose"), t("tab_dashboard")])
 
 
@@ -1115,7 +1083,7 @@ with tabs[0]:
             ss["editing_profile"] = not ss.get("editing_profile",False); st.rerun()
 
     if ss.get("editing_profile"):
-        if True:  # was st.expander — removed to fix Material Icons icon bug
+        if True:
             ef1, ef2 = st.columns(2)
             with ef1:
                 en  = st.text_input(t("pf_name"), value=ss.get("name",""), key="e_name")
@@ -1128,7 +1096,6 @@ with tabs[0]:
                 ds  = ss.get("diabetes_type","Type 2"); di = de.index(ds) if ds in de else 0
                 edt = st.selectbox(t("pf_diabetes"), do, index=di, key="e_dtype")
 
-            # Convert stored cm back to ft + inches for display
             _stored_cm = int(ss.get("height_cm", 0) or 0)
             _total_in  = round(_stored_cm / 2.54)
             _def_ft    = _total_in // 12
@@ -1138,7 +1105,7 @@ with tabs[0]:
             ef3a, ef3b, ef4 = st.columns([1, 1, 1])
             with ef3a: e_ft = st.number_input(t("pf_feet"),   0, 8,   int(ss.get("edit_height_ft", _def_ft)), key="e_ft")
             with ef3b: e_in = st.number_input(t("pf_inches"), 0, 11,  int(ss.get("edit_height_in", _def_in)), key="e_in")
-            eh = round((e_ft * 12 + e_in) * 2.54)  # convert to cm for storage
+            eh = round((e_ft * 12 + e_in) * 2.54)
             with ef4: ew = st.number_input(t("pf_weight"), 0.0, 400.0, float(ss.get("weight_kg",0.0) or 0.0), 0.5, key="e_w")
             eb = None
             if eh > 0 and ew > 0:
@@ -1161,6 +1128,8 @@ with tabs[0]:
             if adv_key not in ss: ss[adv_key] = False
             if st.button("➕ " + ("Add recent test results (optional)" if _lang()=="en" else "حالیہ ٹیسٹ کے نتائج شامل کریں"), key="adv_tog", use_container_width=False):
                 ss[adv_key] = not ss[adv_key]; st.rerun()
+
+            ebps = ebpd = ea1c = etc = ef1 = ef2 = ef3 = 0
             if ss.get(adv_key, False):
                 st.caption(t("pf_advanced_note"))
                 a1,a2,a3 = st.columns(3)
@@ -1255,66 +1224,18 @@ with tabs[0]:
                 ss["prefer_desi"] = prefer_desi; ss["veg_only"] = veg_only; st.rerun()
         ss["prefer_desi"] = prefer_desi; ss["veg_only"] = veg_only
 
-        days  = _plan_days(); slots = _plan_slots(); lg = _lang()
+        days  = _plan_days()
+        slots = _plan_slots()
+        lg    = _lang()
 
-        # Selected day state — default to day 1
         if "selected_day" not in ss:
             ss["selected_day"] = 1
-
-        DAY_NAMES    = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
-        DAY_NAMES_UR = ["پیر","منگل","بدھ","جمعرات","جمعہ","ہفتہ","اتوار"]
 
         # ── Horizontal day selector ───────────────────────────────────────────
         st.markdown(f"#### {'Select Day' if lg=='en' else 'دن منتخب کریں'}")
 
-        # Build day button labels (Urdu-aware)
         _day_word = "Day" if lg == "en" else "دن"
         active_dn = ss["selected_day"]
-
-        # Inject JS that runs after render to highlight the active button.
-        # We match by the button's data-testid key which Streamlit sets reliably.
-        # This avoids nth-child ambiguity when multiple column groups exist on page.
-        st.markdown(f"""
-<script>
-(function() {{
-    function highlightActive() {{
-        var activeKey = "day_sel_{active_dn}";
-        document.querySelectorAll('.stButton > button').forEach(function(btn) {{
-            var parent = btn.closest('[data-testid="stBaseButton-secondary"]') ||
-                         btn.closest('[data-testid]');
-            // Match by aria-label or closest key attribute
-            btn.style.removeProperty('background');
-            btn.style.removeProperty('border');
-            btn.style.removeProperty('color');
-            btn.style.removeProperty('font-weight');
-        }});
-        // Target by key: Streamlit sets data-testid on the wrapper
-        var target = document.querySelector('[data-testid="baseButton-secondary"][key="day_sel_{active_dn}"]');
-        if (!target) {{
-            // Fallback: find by button text containing active day number
-            document.querySelectorAll('.stButton > button').forEach(function(btn) {{
-                if (btn.textContent.includes('{_day_word}') && btn.textContent.includes('{active_dn}')) {{
-                    btn.style.setProperty('background', '#2ea043', 'important');
-                    btn.style.setProperty('border', '2px solid #3fb950', 'important');
-                    btn.style.setProperty('color', '#ffffff', 'important');
-                    btn.style.setProperty('font-weight', '700', 'important');
-                }}
-            }});
-        }}
-    }}
-    // Run now and after a short delay for Streamlit's async rendering
-    highlightActive();
-    setTimeout(highlightActive, 120);
-    setTimeout(highlightActive, 400);
-}})();
-</script>
-<style>
-/* Fallback CSS: active day pill — targets button whose text contains active day */
-button[kind="secondary"]:has(+ * [data-active="true"]) {{
-    background: #2ea043 !important;
-}}
-</style>
-""", unsafe_allow_html=True)
 
         cols = st.columns(len(days))
         for i, day in enumerate(days):
@@ -1327,7 +1248,6 @@ button[kind="secondary"]:has(+ * [data-active="true"]) {{
                 ss["selected_day"] = d
 
             with cols[i]:
-                # Wrap active button in a div with a unique id so CSS can target it reliably
                 if is_active:
                     st.markdown(f'<div id="daypill-active-{dn}" class="daypill-active-wrapper">', unsafe_allow_html=True)
                 st.button(label, key=f"day_sel_{dn}",
@@ -1335,20 +1255,41 @@ button[kind="secondary"]:has(+ * [data-active="true"]) {{
                 if is_active:
                     st.markdown('</div>', unsafe_allow_html=True)
 
-        # CSS targeting the wrapper div — guaranteed to surround only the active button
-        st.markdown(f"""
+        # ── Active day pill CSS — green glow, no red outline ──────────────────
+        st.markdown("""
 <style>
-.daypill-active-wrapper .stButton > button {{
+/* Kill Streamlit's default red focus ring on ALL buttons */
+.stButton > button:focus,
+.stButton > button:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Active day pill — green glow */
+.daypill-active-wrapper .stButton > button {
     background: #2ea043 !important;
     border: 2px solid #3fb950 !important;
     color: #ffffff !important;
     font-weight: 700 !important;
-    box-shadow: 0 0 0 3px rgba(63,185,80,0.25) !important;
-}}
-.daypill-active-wrapper .stButton > button:hover {{
+    outline: none !important;
+    box-shadow:
+        0 0 0 3px rgba(63,185,80,0.40),
+        0 0 14px rgba(63,185,80,0.30) !important;
+}
+.daypill-active-wrapper .stButton > button:focus,
+.daypill-active-wrapper .stButton > button:focus-visible {
+    outline: none !important;
+    box-shadow:
+        0 0 0 3px rgba(63,185,80,0.40),
+        0 0 14px rgba(63,185,80,0.30) !important;
+}
+.daypill-active-wrapper .stButton > button:hover {
     background: #3fb950 !important;
     color: #ffffff !important;
-}}
+    box-shadow:
+        0 0 0 4px rgba(63,185,80,0.55),
+        0 0 20px rgba(63,185,80,0.40) !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1385,7 +1326,6 @@ button[kind="secondary"]:has(+ * [data-active="true"]) {{
                 f'</div>',
                 unsafe_allow_html=True,
             )
-            # ── NEW: "Why this meal?" explainability button ───────────────────
             why_key = f"why_{sel_num}_{slot}"
             w_col, _ = st.columns([1, 4])
             with w_col:
@@ -1439,7 +1379,6 @@ button[kind="secondary"]:has(+ * [data-active="true"]) {{
                     swaps = generate_swaps("; ".join(names))
                 st.markdown(f"**{t('swaps_heading')}**")
                 for s in swaps: st.write("•", s)
-
 
     st.divider()
 
@@ -1495,7 +1434,6 @@ with tabs[1]:
 
     user_input = st.chat_input(t("chat_placeholder"))
     if user_input:
-        # ── NEW: RAG retrieval — inject evidence into LLM context silently ──
         rag_chunks = _rag_retrieve(user_input, top_k=2)
         if rag_chunks:
             rag_context = "\n\n".join(
@@ -1618,7 +1556,7 @@ with tabs[3]:
                                             "value":t("col_val"),"meal_note":t("col_note")}),
                          use_container_width=True)
 
-        # ── NEW: AI Glucose Trend Analysis ────────────────────────────────────
+        # ── AI Glucose Trend Analysis ─────────────────────────────────────────
         st.divider()
         st.markdown("### 🤖 " + ("AI Trend Analysis" if _lang()=="en" else "AI رجحان تجزیہ"))
         st.caption(
