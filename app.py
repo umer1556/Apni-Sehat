@@ -1272,7 +1272,7 @@ with tabs[0]:
             st.markdown(
                 f'<div class="meal-card">'
                 f'<div class="meal-card-slot">{ico} {lbl}</div>'
-                f'<div class="meal-card-name">{meal["name"]}</div>'
+                f'<div class="meal-card-name">{meal.get("name_ur", meal["name"]) if lg == "ur" else meal["name"]}</div>'                
                 f'<div class="meal-card-note">~{cg}{"گرام کاربس" if lg=="ur" else "g carbs"} &nbsp;·&nbsp; {_NOTES_UR.get(meal["notes"], meal["notes"]) if lg=="ur" else meal["notes"]}</div>'
                 f'</div>',
                 unsafe_allow_html=True,
