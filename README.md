@@ -1,14 +1,20 @@
 # 🩺 Apni Sehat — اپنی صحت
 
+> **Your Personal Diabetes Health Companion**  
+> **HEC GenAI Hackathon 2025 Submission**  
 > **Bilingual AI-powered diabetes companion for Pakistan** — personalised desi meal plans, evidence-backed health chat, blood sugar tracking, and clinical triage. Built for the 33 million Pakistanis living with diabetes.
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white"/>
   <img src="https://img.shields.io/badge/Streamlit-1.x-FF4B4B?style=flat-square&logo=streamlit&logoColor=white"/>
   <img src="https://img.shields.io/badge/LLM-Groq%20%2F%20LLaMA%203.3%2070B-F55036?style=flat-square"/>
-  <img src="https://img.shields.io/badge/DB-Supabase%20PostgreSQL-3ECF8E?style=flat-square&logo=supabase&logoColor=white"/>
+  <img src="https://img.shields.io/badge/DB-PostgreSQL%20%2B%20SQLite-3ECF8E?style=flat-square"/>
   <img src="https://img.shields.io/badge/Guidelines-ADA%202024%20%7C%20IDF--DAR%20%7C%20PHL%202023%20%7C%20PES-blue?style=flat-square"/>
   <img src="https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square"/>
+</p>
+
+<p align="center">
+  <strong>Clinical advisor:</strong> Dr. Fatima Farhat
 </p>
 
 ---
@@ -30,54 +36,66 @@ Yet access to personalised dietary guidance is expensive, clinic appointments ar
 | Feature | Description |
 |---|---|
 | 🧙 **2-step onboarding** | Name, phone, diabetes type, height/weight (ft+inches), conditions — no account, no password, no app install |
+| 🌐 **Full Urdu/English toggle** | Every UI string, every prompt, and every AI response stays in the user’s selected language |
 | 🔴 **Clinical triage** | Evaluates HbA1c, BP, cholesterol and comorbidities — assigns GREEN / AMBER / RED before granting access to any features |
-| 🥗 **Personalised 7-day desi meal plan** | 35 curated South Asian meals across 6 slots, filtered by conditions and dietary preferences |
+| 🥗 **Personalised 7-day desi meal plan** | 39 curated South Asian meals across 6 slots, filtered by conditions and dietary preferences, with 4 clinical meal-frequency profiles |
 | 💡 **"Why this meal?" AI explainability** | One click on any meal card reveals a clinical explanation personalised to the user's conditions — in English or Urdu |
-| 🤖 **Sehat Saathi — bilingual health chatbot** | Multi-turn AI assistant backed by ADA 2024, IDF-DAR and WHO dietary evidence via RAG |
+| 🤖 **Sehat Saathi — bilingual health chatbot** | Multi-turn RAG chatbot backed by ADA 2024, IDF-DAR and WHO dietary evidence, with source-aware responses |
 | 📊 **Blood glucose tracker** | Log readings, view trend charts with clinical threshold lines, receive alerts |
-| 📈 **AI glucose trend analysis** | Structured 4-section clinical analysis of the user's reading patterns |
-| 🔄 **AI food swaps** | Desi-appropriate, diabetes-safe alternative meals for any day |
-| ✅ **Daily plan adherence** | Check-in system with AI deviation coaching when users go off-plan |
+| 📈 **AI glucose trend analysis** | Structured clinical analysis of the user’s last 14 readings with time-of-day insights and practical actions |
+| 🔄 **AI food swaps** | Desi-appropriate, diabetes-safe alternative meals for any day in the plan |
+| ✅ **Daily plan adherence** | Check-in system with duplicate-safe upsert guard and AI deviation coaching when users go off-plan |
+| 🔒 **Privacy-first identity** | Raw phone number is never stored — user identity uses one-way HMAC-SHA256 hashing with a server-side secret |
 
 ---
 
 ## Generative AI Features — In Depth
 
-The app uses **Groq's API (LLaMA 3.3 70B)** for six distinct AI-powered features, each with a specific clinical purpose.
+The app uses **Groq's API (LLaMA 3.3 70B)** for **five distinct AI-powered features**, each with a specific clinical purpose.
 
 ### 1. Sehat Saathi — Evidence-Backed Bilingual Chatbot
-- Auto-detects language — responds in **Urdu script** or English based on the user's input
-- Silently injected with the user's full medical profile for personalised answers
+- Responds in **English or Urdu** based on the user’s selected language
+- Silently injected with the user's medical profile for personalised answers
 - **RAG (Retrieval-Augmented Generation)** — every user message is matched against a curated knowledge base sourced from:
   - ADA Standards of Care 2024 — Nutrition & Glycaemic Targets
   - IDF-DAR Diabetes and Ramadan Guidelines 2021
   - WHO / South Asian Dietary Guidelines
   - Pakistan NCD Guidelines
-  - GI/GL values for 20+ common desi foods (Foster-Powell et al.)
-- Top 2 matching evidence chunks are injected into context — the LLM cites sources naturally in responses
+  - GI/GL values for common desi foods (Foster-Powell et al., Atkinson et al.)
+- Top evidence chunks are injected into context for grounded answers
 - Strictly refuses medication advice, diagnoses, and dose changes — enforced at the system prompt level
 
 ### 2. "Why This Meal?" Explainability
 - Every meal card has a **💡 Why this meal?** button
-- The LLM receives the patient's full clinical profile and explains the meal in 2–3 sentences — one glycaemic benefit, one cultural/practical benefit
+- The LLM receives the patient’s profile and explains the meal in 2–3 sentences:
+  - one glycaemic / metabolic benefit
+  - one cultural or practical benefit
 - Available in both English and Urdu
 
 ### 3. AI Glucose Trend Analysis
-- Analyses the user's last 14 glucose readings
-- Computes time-of-day averages (morning / afternoon / evening), reading-type breakdown, and trend direction
-- Returns a structured 4-section report: **Pattern Summary → Time-of-Day Insights → 3 Specific Recommendations → Watch Out For**
-- All recommendations are desi-context-aware and non-diagnostic
+- Analyses the user’s **last 14 glucose readings**
+- Reviews time-of-day patterns (morning / afternoon / evening) and risk signals
+- Returns a structured response with:
+  - **Pattern Summary**
+  - **Time-of-Day Insights**
+  - **3 Practical Actions**
+  - **Watch Out For**
+- Non-diagnostic and clinically cautious by design
 
 ### 4. Healthy Swap Suggestions
-- AI-generated, culturally relevant, diabetes-safe alternatives for any day in the plan
+- AI-generated, culturally relevant, diabetes-safe alternatives for meals in the user’s plan
+- Supports English and Urdu output
+- Designed for realistic South Asian household food choices (not generic Western swaps)
 
 ### 5. Deviation Coaching
-- When a user didn't follow their plan, the LLM returns 3 personalised encouraging tips covering portion control, carb awareness, and healthier preparation methods
+- If a user logs what they actually ate instead of the plan, the app gives:
+  - kind encouragement
+  - portion guidance
+  - carb awareness tips
+  - healthier prep suggestions
+- Delivered in the user’s selected language for better adherence and usability
 
-### 6. Meal Plan Generation
-- Dynamically generated 7-day plan filtered by diabetes type, conditions, dietary preferences, BMI, and insulin status
-
-All AI calls degrade gracefully when the API is unavailable and include clinical disclaimers.
+> All AI calls degrade gracefully when the API is unavailable, use retry/backoff handling, and include clear safety messaging.
 
 ---
 
@@ -87,14 +105,14 @@ The app assigns one of **4 clinically-grounded profiles** based on insulin use, 
 
 | Profile | Structure | Who Gets It | Clinical Rationale |
 |---|---|---|---|
-| `3M_3S` | 3 meals + 3 snacks (incl. bedtime) | Insulin user **and** hypo episodes | Bedtime snack prevents dangerous overnight glucose drops — ADA Standards of Care 2024, Section 5 |
-| `3M_2S` | 3 meals + 2 snacks | Insulin user **or** hypo episodes **or** weakness between meals | Mid-morning and afternoon snacks buffer inter-meal glucose dips — PES meal frequency guidance |
-| `SMALL_3M_1S` | 3 lighter meals + 1 snack | BMI ≥ 23, Type 2, no insulin | Portion-controlled for simultaneous glucose and weight management — ADA/PES weight management guidance |
-| `3M_1S` | 3 meals + 1 snack | All others | Standard ADA nutrition therapy for stable Type 2 |
+| `3M_3S` | 3 meals + 3 snacks (incl. bedtime) | Insulin user **and** hypo episodes | Bedtime snack helps reduce risk of overnight glucose drops — ADA Standards of Care 2024 |
+| `3M_2S` | 3 meals + 2 snacks | Insulin user **or** hypo episodes **or** weakness between meals | Mid-morning and afternoon snacks help buffer inter-meal glucose dips |
+| `SMALL_3M_1S` | 3 lighter meals + 1 snack | BMI ≥ 23, Type 2, no insulin | Portion-controlled for glucose + weight management in South Asian populations |
+| `3M_1S` | 3 meals + 1 snack | All others | Standard nutrition structure for stable Type 2 management |
 
-**South Asian BMI thresholds** are applied throughout — overweight at ≥ 23.0, obese at ≥ 27.5, per the WHO Expert Consultation on Asian BMI thresholds (2004), adopted by the Pakistan NCD Programme. These are lower than Western thresholds (25.0 / 30.0) and correctly reflect higher metabolic risk at lower BMI in South Asian populations.
+**South Asian BMI thresholds** are applied throughout — overweight at **≥ 23.0**, obese at **≥ 27.5**, reflecting higher metabolic risk at lower BMI in South Asian populations.
 
-### Meal Bank — 35 Curated Desi Meals
+### Meal Bank — 39 Curated Desi Meals
 
 | Slot | Sample Meals |
 |---|---|
@@ -109,22 +127,41 @@ Every meal is tagged and filtered automatically:
 
 | Tag | Applied When |
 |---|---|
-| `low_sodium` | User has hypertension — per DASH diet / Pakistan Hypertension League |
-| `low_satfat` | User has high cholesterol — per Pakistan Society of Cardiology |
+| `low_sodium` | User has hypertension — per DASH / Pakistan hypertension guidance |
+| `low_satfat` | User has high cholesterol — per lipid management guidance |
 | `veg` | User selects vegetarian preference |
 | `light` | User is on `SMALL_3M_1S` portion-controlled profile |
+| `high_fiber` | Prioritised where possible for improved satiety and glycaemic control |
+
+---
+
+## Clinical Accuracy
+
+All key thresholds are sourced and cited inline in the codebase (`config.py`) and used consistently across triage and guidance.
+
+| Threshold | Value | Source |
+|---|---|---|
+| Hypertensive crisis | ≥ 180/120 mmHg | PHL Guidelines 2023 / ESC-ESH |
+| Stage 2 hypertension | ≥ 140/90 mmHg | PHL Guidelines 2023 |
+| Hypoglycaemia | < 70 mg/dL | ADA Standards of Care 2024 |
+| Urgent glucose action | ≥ 250 mg/dL | IDF-DAR Ramadan Guidelines 2021 |
+| HbA1c well-controlled | < 7.0% | ADA 2024 + Pakistan Endocrine Society |
+| HbA1c RED trigger | ≥ 9.0% | ADA 2024 |
+| Overweight (South Asian) | BMI ≥ 23.0 | WHO Expert Consultation |
+
+**GI values** in the meal knowledge base are sourced from Foster-Powell et al. and Atkinson et al. and used for educational support only.
 
 ---
 
 ## Clinical Safety Layer
 
-Before accessing any feature, every user's data passes through `triage.py` — a fully cited, independently tested safety module. The logic is covered by **14 automated test cases** verifying correct routing across all clinical scenarios.
+Before accessing any feature, every user’s data passes through `triage.py` — a fully cited, independently tested safety module.
 
 ### Triage Outcomes
 
 | 🟢 GREEN | 🟡 AMBER | 🔴 RED |
 |---|---|---|
-| Full access — all values within clinical targets | Full access with appropriate warnings — one or more values above goal | **Blocked** — directed to seek clinical care before using the app |
+| Full access — values within clinical targets | Full access with warnings — one or more values above goal or uncertain | **Blocked** — directed to seek clinical care before using the app |
 
 ### RED Triggers — any one is sufficient to block access
 
@@ -134,36 +171,34 @@ Before accessing any feature, every user's data passes through `triage.py` — a
 | Blood pressure | ≥ 180 systolic **or** ≥ 120 diastolic | PHL 2023 — hypertensive crisis |
 | HbA1c | ≥ 9.0% | ADA Standards of Care 2024 |
 | Any single fasting glucose | ≥ 250 mg/dL | IDF-DAR Ramadan Guidelines 2021 |
-| Fasting glucose variability | Range ≥ 120 mg/dL **or** SD ≥ 45 mg/dL | Battelino et al. *Diabetes Care* 2019 |
+| Fasting glucose variability | Range ≥ 120 mg/dL **or** SD ≥ 45 mg/dL | Safety screening flag |
 
-### AMBER Triggers — user proceeds with clinical warnings
+### AMBER Triggers — user proceeds with warnings
 
 | Signal | Threshold | Guideline Source |
 |---|---|---|
-| Blood pressure | ≥ 140 systolic **or** ≥ 90 diastolic | Pakistan Hypertension League (PHL) 2023 |
-| HbA1c | > 7.0% — any elevation above goal | ADA 2024 + Pakistan Endocrine Society (PES) |
-| HbA1c stronger warning | ≥ 8.0% | PES — accepted upper limit for elderly/complex patients |
-| Any fasting glucose | < 70 mg/dL | ADA 2024 — Level 1 hypoglycaemia |
-| Any fasting glucose | > 130 mg/dL pre-meal | ADA 2024 — above pre-meal target range |
-| Fasting variability | SD ≥ 25 mg/dL | Pragmatic screening threshold† |
-| Total cholesterol | ≥ 200 mg/dL | Pakistan Society of Cardiology / NCEP ATP III |
-| Hypertension or high cholesterol ticked, no values given | — | Conservative default |
+| Blood pressure | ≥ 140 systolic **or** ≥ 90 diastolic | PHL 2023 |
+| HbA1c | > 7.0% | ADA 2024 + PES |
+| HbA1c stronger warning | ≥ 8.0% | PES (pragmatic upper target in some cases) |
+| Any fasting glucose | < 70 mg/dL | ADA 2024 |
+| Any fasting glucose | > 130 mg/dL pre-meal | ADA 2024 |
+| Fasting variability | SD ≥ 25 mg/dL | Screening flag (non-diagnostic) |
+| Total cholesterol | ≥ 200 mg/dL | Standard lipid risk threshold |
+| Hypertension/high cholesterol ticked, no values given | — | Conservative safety default |
 | No clinical data provided at all | — | Cannot assess risk — cautious AMBER |
-
-> **† Note on variability thresholds:** The fasting SD and range thresholds are pragmatic screening flags. Clinical glycaemic variability is formally measured using Coefficient of Variation (CV% >36% = high variability, Danne et al. *Diabetes Care* 2017). Our proxy uses SD of a small fasting readings sample — described in the UI as a "screening flag" rather than a diagnostic threshold, and reviewed by our clinical advisor.
 
 ### Handling Uncertainty
 
-Users who answer "Not sure" on blood pressure or cholesterol are treated conservatively (assumed positive for safety) and shown a gentle prompt to get a free clinic check. Users who select "Not sure / not diagnosed" for diabetes receive an AMBER flag, a cautious low-GI plan, and a direct message to get a fasting blood sugar test.
+Users who answer **“Not sure”** for blood pressure or cholesterol are treated conservatively for safety and shown a gentle prompt to get checked. Users unsure of their diabetes status receive a cautious AMBER route and a clear recommendation to seek diagnostic testing.
 
 ---
 
 ## Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Streamlit Frontend                       │
-│  Entry Screen → 2-Step Wizard → Main App (4 tabs)           │
+│  Entry Screen → 2-Step Wizard → Main App (4 tabs)          │
 │  ┌──────────┬─────────────┬────────────┬──────────────────┐ │
 │  │ My Plan  │    Chat     │  Log Sugar │    Progress      │ │
 │  │ Day pills│  Sehat      │  Glucose   │  Adherence +     │ │
@@ -177,8 +212,8 @@ Users who answer "Not sure" on blood pressure or cholesterol are treated conserv
            ┌───────────┴────────────┐
            │                        │
 ┌──────────▼────────┐   ┌───────────▼──────────┐
-│  Groq / LLaMA     │   │  Supabase PostgreSQL  │
-│  3.3 70B          │   │  (+ SQLite fallback)  │
+│  Groq / LLaMA     │   │  SQLAlchemy Storage   │
+│  3.3 70B          │   │  PostgreSQL / SQLite  │
 │  · Sehat Saathi   │   │  · profiles           │
 │  · Why this meal? │   │  · glucose_logs       │
 │  · Swap ideas     │   │  · daily_checkins     │
@@ -188,38 +223,54 @@ Users who answer "Not sure" on blood pressure or cholesterol are treated conserv
            │
 ┌──────────▼──────────────────────────────────────────────┐
 │                    Core Modules                         │
-│  app.py          — UI, flow, session state, RAG         │
-│  config.py       — thresholds with full source citations│
+│  app.py          — UI, flow, routing, RAG integration   │
+│  config.py       — thresholds + meal profiles           │
 │  planner.py      — meal frequency + plan generation     │
-│  meal_bank.py    — 35-meal curated desi dataset         │
-│  triage.py       — safety routing (14 automated tests)  │
-│  translations.py — bilingual string registry            │
+│  meal_bank.py    — 39-meal curated desi dataset         │
+│  triage.py       — safety routing (GREEN/AMBER/RED)     │
+│  translations.py — bilingual string registry (en/ur)    │
 │  llm.py          — Groq API (chat, swaps, coaching)     │
-│  storage.py      — database abstraction layer           │
+│  storage.py      — DB abstraction + upsert guards       │
 └─────────────────────────────────────────────────────────┘
 ```
 
 ### Privacy by Design
-Phone numbers are **never stored**. A one-way SHA-256 hash with a server-side salt is used as the user identifier. Even with full database access, no phone number can be recovered.
+Raw phone numbers are **never stored**. A one-way **HMAC-SHA256** hash (with a server-side secret via `PHONE_SALT`) is used as the user identifier.
 
 ---
 
 ## Project Structure
 
-```
+```text
 Apni-Sehat/
-├── app.py            # Main app — all UI, RAG, AI feature integration
-├── config.py         # Clinical thresholds with full guideline citations
-├── planner.py        # Meal frequency assignment + 7-day plan generation
-├── meal_bank.py      # 35-meal curated desi dataset across 6 slots
+├── app.py            # Main app — UI, navigation, RAG, AI feature integration
+├── config.py         # Clinical thresholds + meal profiles (with inline citations)
+├── planner.py        # 7-day meal plan generator (deduplication, clinical filters)
+├── meal_bank.py      # Curated desi meal dataset (39 meals, tagged slots)
 ├── triage.py         # Clinical safety routing — GREEN / AMBER / RED
-├── llm.py            # Groq / LLaMA 3.3 — chat, swaps, coaching
-├── storage.py        # Database layer (SQLAlchemy + Supabase / SQLite)
-├── translations.py   # All UI strings in English and Urdu
+├── llm.py            # Groq / LLaMA 3.3 — chat, swaps, coaching, trend analysis
+├── storage.py        # SQLAlchemy layer (PostgreSQL + SQLite fallback, upsert guard)
+├── translations.py   # English + Urdu UI strings (full parity across app)
 ├── requirements.txt  # Python dependencies
 └── .streamlit/
-    └── secrets.toml  # API keys — never committed to git
+    └── secrets.toml  # API keys — never commit to git
 ```
+
+### Module Responsibilities
+
+**`config.py`** — Single source of truth for clinical thresholds and meal profile logic. All clinical values are documented and easy to update by doctor/clinical teammates.
+
+**`triage.py`** — Safety gate. RED users are blocked and advised to seek care. AMBER users can proceed with warnings. GREEN users get full access.
+
+**`planner.py`** — Builds the 7-day meal plan using randomised, deduplicated selection to minimise repetition while preserving dietary and clinical filters.
+
+**`meal_bank.py`** — Curated desi meal dataset with tags such as `veg`, `low_sodium`, `low_satfat`, `high_fiber`, and `light`.
+
+**`llm.py`** — Handles all Groq LLM calls (chatbot, swaps, meal explainability, coaching, trend analysis) with language-aware prompts, retry/backoff, and safe fallbacks.
+
+**`storage.py`** — Database layer with PostgreSQL + SQLite support, Streamlit-friendly connection handling, and one-check-in-per-day upsert protection to avoid adherence inflation.
+
+**`translations.py`** — Central registry of all app strings in English and Urdu, keeping UI and AI feature labels consistent across both languages.
 
 ---
 
@@ -228,7 +279,7 @@ Apni-Sehat/
 ### Prerequisites
 - Python 3.10+
 - A [Groq API key](https://console.groq.com) — free tier is sufficient
-- A [Supabase](https://supabase.com) project — free tier works, or the app runs on local SQLite automatically
+- A PostgreSQL database URL (e.g. [Supabase](https://supabase.com)) **or** leave it blank to use local SQLite automatically
 
 ### 1. Clone
 ```bash
@@ -244,21 +295,25 @@ pip install -r requirements.txt
 ### 3. Configure secrets
 
 Create `.streamlit/secrets.toml`:
+
 ```toml
 GROQ_API_KEY   = "your-groq-api-key"
-DATABASE_URL   = "postgresql+psycopg://USER:PASSWORD@HOST:PORT/DBNAME"
-PHONE_SALT     = "any-random-secret-string"
-
-# Optional — defaults shown
-GROQ_BASE_URL  = "https://api.groq.com/openai/v1"
 GROQ_MODEL     = "llama-3.3-70b-versatile"
+GROQ_BASE_URL  = "https://api.groq.com/openai/v1"
+
+# PostgreSQL (optional — leave blank for SQLite fallback)
+DATABASE_URL   = "postgresql+psycopg://USER:PASSWORD@HOST:PORT/DBNAME"
+
+# Required for privacy-safe user identity hashing
+PHONE_SALT     = "any-random-secret-string"
 ```
 
-> **No Supabase?** Leave `DATABASE_URL` empty — the app falls back to a local `data.db` SQLite file automatically.
+> **No Supabase?** Leave `DATABASE_URL` empty — the app falls back to a local SQLite file automatically.
 
-### 4. Database setup (Supabase only)
+### 4. Database setup (Supabase / PostgreSQL only)
 
-Run in the Supabase **SQL Editor**:
+Run in the Supabase **SQL Editor** (optional — `init_db()` can also create tables automatically on first run):
+
 ```sql
 CREATE TABLE IF NOT EXISTS public.profiles (
     user_key             VARCHAR(80) PRIMARY KEY,
@@ -296,21 +351,22 @@ CREATE TABLE IF NOT EXISTS public.daily_checkins (
 );
 ```
 
-> `init_db()` creates these tables automatically on first run — the SQL above is for manual setup and transparency.
-
 ### 5. Run
 ```bash
 streamlit run app.py
 ```
+
+App opens at: `http://localhost:8501`
 
 ---
 
 ## Deploying to Streamlit Cloud
 
 1. Push to GitHub — ensure `.streamlit/secrets.toml` is in `.gitignore`
-2. Go to [share.streamlit.io](https://share.streamlit.io) → New app → select repo and `app.py`
-3. Add secrets under **Settings → Secrets**
-4. Deploy — free hosting, no server management
+2. Go to [share.streamlit.io](https://share.streamlit.io) → **New app**
+3. Select your repo and `app.py`
+4. Add secrets under **Settings → Secrets**
+5. Deploy — free hosting, no server management
 
 ---
 
@@ -319,11 +375,31 @@ streamlit run app.py
 | Package | Purpose |
 |---|---|
 | `streamlit` | Web UI framework |
-| `sqlalchemy>=2.0` | Database ORM |
-| `psycopg[binary]` | PostgreSQL driver (psycopg3) |
+| `sqlalchemy>=2.0` | Database ORM / DB abstraction |
+| `psycopg[binary]` | PostgreSQL driver (optional if using PostgreSQL) |
 | `openai>=1.0` | Groq API client (OpenAI-compatible) |
-| `pandas` | Data handling for the adherence dashboard |
+| `pandas` | Data handling for logs and adherence tracking |
 | `matplotlib` | Glucose trend chart rendering |
+
+### Minimum Requirements
+```txt
+streamlit>=1.30.0
+openai>=1.0.0
+sqlalchemy>=2.0.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+psycopg[binary]>=3.0.0   # optional — for PostgreSQL
+```
+
+---
+
+## Known Limitations
+
+| Limitation | Impact | Mitigation |
+|---|---|---|
+| RAG uses TF-IDF + n-gram cosine (no embeddings) | May miss strongly paraphrased queries | Broad keyword coverage and cosine similarity improve partial matching |
+| Groq API dependency | AI features may be unavailable temporarily | Retry/backoff + graceful fallbacks + clear user-facing error messages |
+| Meal bank has 39 meals | Some slots may repeat after several days | Deduplicated selection reduces consecutive repeats |
 
 ---
 
@@ -333,7 +409,7 @@ streamlit run app.py
 - **Not medication advice.** The app never suggests insulin doses, medication changes, or diagnoses.
 - **Not a replacement for clinical care.** RED-triaged users are explicitly blocked and directed to a clinician.
 - The meal bank should be reviewed by a registered dietitian before any real-world deployment at scale.
-- AI suggestions are prompt-constrained and reviewed by our clinical advisor but are not reviewed by a clinician in real time.
+- AI suggestions are prompt-constrained and clinically reviewed at design level, but not reviewed by a clinician in real time.
 
 ---
 
