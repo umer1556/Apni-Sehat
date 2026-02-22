@@ -85,9 +85,7 @@ st.markdown("""
 }
 
 /* ── Base ── */
-html {
-    color-scheme: dark light;
-}
+html { color-scheme: dark light; }
 html, body,
 .stApp,
 [data-testid="stAppViewContainer"],
@@ -201,6 +199,18 @@ div.block-container,
 .stButton > button[kind="primary"]:hover {
     background: var(--green) !important;
     transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px var(--green-t) !important;
+}
+
+/* ── Kill red focus ring on all buttons ── */
+.stButton > button:focus,
+.stButton > button:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+.stButton > button[kind="primary"]:focus,
+.stButton > button[kind="primary"]:focus-visible {
+    outline: none !important;
     box-shadow: 0 4px 14px var(--green-t) !important;
 }
 
@@ -331,7 +341,6 @@ hr { border-color: var(--border) !important; }
 /* ══════════════════════════════════════════
    CUSTOM COMPONENTS
 ══════════════════════════════════════════ */
-
 .tip-banner {
     background: var(--green-t);
     border: 1px solid var(--green2);
@@ -433,27 +442,6 @@ hr { border-color: var(--border) !important; }
     font-size: 0.88rem; color: var(--txt3); line-height: 1.6;
 }
 
-/* Day selector pill buttons */
-.day-pill .stButton > button {
-    width: 100% !important;
-    text-align: center !important;
-    justify-content: center !important;
-    font-size: 0.88rem !important;
-    font-weight: 700 !important;
-    padding: 10px 6px !important;
-    min-height: 56px !important;
-    background: var(--bg2) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 10px !important;
-    color: var(--txt2) !important;
-    letter-spacing: 0 !important;
-    line-height: 1.4 !important;
-}
-.day-pill .stButton > button:hover {
-    background: var(--bg3) !important;
-    border-color: var(--green) !important;
-    color: var(--green) !important;
-}
 .section-label {
     font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--txt3);
     text-transform: uppercase; letter-spacing: 0.1em;
@@ -990,8 +978,7 @@ if ss.get("setup_step") in (1, 2):
                                 "Following a cautious low-GI plan until diagnosis is confirmed.",
                             ]
                         else:
-                            _run_triage(dtype, hy or hy_ns, ch or ch_ns,
-                                        other_major=other)
+                            _run_triage(dtype, hy or hy_ns, ch or ch_ns, other_major=other)
 
                         ss.update({
                             "has_hypertension":     hy or hy_ns,
@@ -1129,6 +1116,7 @@ with tabs[0]:
             if st.button("➕ " + ("Add recent test results (optional)" if _lang()=="en" else "حالیہ ٹیسٹ کے نتائج شامل کریں"), key="adv_tog", use_container_width=False):
                 ss[adv_key] = not ss[adv_key]; st.rerun()
 
+            # Initialise so Save never hits NameError if advanced panel is closed
             ebps = ebpd = ea1c = etc = ef1 = ef2 = ef3 = 0
             if ss.get(adv_key, False):
                 st.caption(t("pf_advanced_note"))
@@ -1239,59 +1227,22 @@ with tabs[0]:
 
         cols = st.columns(len(days))
         for i, day in enumerate(days):
-            dn       = day["day"]
-            day_name = (DAY_NAMES_UR if lg == "ur" else DAY_NAMES)[(dn - 1) % 7]
+            dn        = day["day"]
+            day_name  = (DAY_NAMES_UR if lg == "ur" else DAY_NAMES)[(dn - 1) % 7]
             is_active = (dn == active_dn)
-            label    = f"{day_name}\n{_day_word} {dn}"
+            label     = f"{day_name}\n{_day_word} {dn}"
 
             def _select(d=dn):
                 ss["selected_day"] = d
 
             with cols[i]:
-                if is_active:
-                    st.markdown(f'<div id="daypill-active-{dn}" class="daypill-active-wrapper">', unsafe_allow_html=True)
-                st.button(label, key=f"day_sel_{dn}",
-                          use_container_width=True, on_click=_select)
-                if is_active:
-                    st.markdown('</div>', unsafe_allow_html=True)
-
-        # ── Active day pill CSS — green glow, no red outline ──────────────────
-        st.markdown("""
-<style>
-/* Kill Streamlit's default red focus ring on ALL buttons */
-.stButton > button:focus,
-.stButton > button:focus-visible {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-/* Active day pill — green glow */
-.daypill-active-wrapper .stButton > button {
-    background: #2ea043 !important;
-    border: 2px solid #3fb950 !important;
-    color: #ffffff !important;
-    font-weight: 700 !important;
-    outline: none !important;
-    box-shadow:
-        0 0 0 3px rgba(63,185,80,0.40),
-        0 0 14px rgba(63,185,80,0.30) !important;
-}
-.daypill-active-wrapper .stButton > button:focus,
-.daypill-active-wrapper .stButton > button:focus-visible {
-    outline: none !important;
-    box-shadow:
-        0 0 0 3px rgba(63,185,80,0.40),
-        0 0 14px rgba(63,185,80,0.30) !important;
-}
-.daypill-active-wrapper .stButton > button:hover {
-    background: #3fb950 !important;
-    color: #ffffff !important;
-    box-shadow:
-        0 0 0 4px rgba(63,185,80,0.55),
-        0 0 20px rgba(63,185,80,0.40) !important;
-}
-</style>
-""", unsafe_allow_html=True)
+                st.button(
+                    label,
+                    key=f"day_sel_{dn}",
+                    use_container_width=True,
+                    on_click=_select,
+                    type="primary" if is_active else "secondary",
+                )
 
         st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
         st.divider()
