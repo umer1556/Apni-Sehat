@@ -1226,22 +1226,43 @@ with tabs[0]:
 
         # ── Horizontal day selector ───────────────────────────────────────────
         st.markdown(f"#### {'Select Day' if lg=='en' else 'دن منتخب کریں'}")
+
+        # Find which column index is the active day — used for CSS targeting
+        active_col_idx = next(
+            (i for i, d in enumerate(days) if d["day"] == ss["selected_day"]), 0
+        )
+
+        # Inject CSS that targets the active button by its column position.
+        # This is more reliable than div wrapper classes because Streamlit
+        # doesn't guarantee the button renders inside the wrapper div in the DOM.
+        st.markdown(f"""
+<style>
+div[data-testid="column"]:nth-child({active_col_idx + 1}) .stButton > button {{
+    background: var(--green2) !important;
+    border: 2px solid var(--green) !important;
+    border-radius: 10px !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}}
+div[data-testid="column"]:nth-child({active_col_idx + 1}) .stButton > button:hover {{
+    background: var(--green) !important;
+    color: #ffffff !important;
+}}
+</style>
+""", unsafe_allow_html=True)
+
         cols = st.columns(len(days))
         for i, day in enumerate(days):
             dn       = day["day"]
             day_name = DAY_NAMES[(dn - 1) % 7]
-            is_sel   = (dn == ss["selected_day"])
-            css_cls  = "day-pill-active" if is_sel else "day-pill"
             label    = f"{day_name}\nDay {dn}"
 
             def _select(d=dn):
                 ss["selected_day"] = d
 
             with cols[i]:
-                st.markdown(f'<div class="{css_cls}">', unsafe_allow_html=True)
                 st.button(label, key=f"day_sel_{dn}",
                           use_container_width=True, on_click=_select)
-                st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
         st.divider()
