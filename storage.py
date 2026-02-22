@@ -184,14 +184,42 @@ def add_daily_checkin(
     user_key: str, checkin_date: date,
     followed_plan: bool, actual_meals: str = ""
 ) -> None:
+    """
+    Upsert daily check-in — only one record per user per date.
+    If the user submits again for the same date, the existing record is
+    updated rather than a duplicate being inserted.
+    This prevents adherence % inflation from multiple same-day submissions.
+    """
+    now = datetime.now()
     with get_engine().begin() as conn:
-        conn.execute(insert(daily_checkins).values(
-            user_key=user_key,
-            checkin_date=checkin_date,
-            followed_plan=1 if followed_plan else 0,
-            actual_meals=actual_meals or None,
-            created_at=datetime.now(),
-        ))
+        existing = conn.execute(
+            select(daily_checkins.c.id).where(
+                daily_checkins.c.user_key     == user_key,
+                daily_checkins.c.checkin_date == checkin_date,
+            )
+        ).fetchone()
+
+        if existing:
+            # Update in place — last submission for the day wins
+            conn.execute(
+                update(daily_checkins)
+                .where(
+                    daily_checkins.c.user_key     == user_key,
+                    daily_checkins.c.checkin_date == checkin_date,
+                )
+                .values(
+                    followed_plan=1 if followed_plan else 0,
+                    actual_meals=actual_meals or None,
+                )
+            )
+        else:
+            conn.execute(insert(daily_checkins).values(
+                user_key=user_key,
+                checkin_date=checkin_date,
+                followed_plan=1 if followed_plan else 0,
+                actual_meals=actual_meals or None,
+                created_at=now,
+            ))
 
 
 def fetch_checkins(user_key: str) -> List[Tuple[str, int, str]]:
