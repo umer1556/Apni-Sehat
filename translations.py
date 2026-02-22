@@ -56,7 +56,7 @@ T = {
         "lang_btn":     "اردو",
         "version":      "v1.2.0 · HEC GenAI Hackathon",
 
-        # Entry screen (no "login" language)
+        # Entry screen
         "entry_heading":    "👋 Hello! Tell us who you are",
         "entry_subtitle":   "We use your phone number to remember your plan. Nothing else is stored.",
         "entry_name":       "Your Name",
@@ -92,10 +92,18 @@ T = {
         "wizard_desi":           "I prefer desi food 🍛",
         "wizard_veg":            "I prefer vegetarian meals 🥦",
         "wizard_age_note":       "You can skip age and other details for now — you can always add them later.",
+        "wiz_diabetes_q":        "Do you have diabetes?",
+        "wiz_not_sure_warning":  (
+            "⚠️ **Please get checked.** Undiagnosed diabetes is common and manageable when caught early. "
+            "Visit your doctor or a nearby clinic for a simple fasting blood sugar test — "
+            "it takes just a few minutes and could make a big difference. "
+            "We will treat your plan cautiously until you know for sure."
+        ),
 
         # Profile card (on plan tab)
         "profile_card_label":  "Your Profile",
         "edit_profile_btn":    "✏️ Edit",
+        "editing_profile":     "Editing profile...",
         "save_profile_btn":    "💾 Save Changes",
         "saving_profile":      "Saving...",
         "profile_saved":       "✅ Saved! Your plan has been updated.",
@@ -117,7 +125,10 @@ T = {
         "pf_gender_opts":   ["Prefer not to say", "Male", "Female", "Other"],
         "pf_diabetes":      "Diabetes Type",
         "pf_diabetes_opts": ["Type 2", "Type 1", "Not sure"],
-        "pf_height":        "Height (cm)",
+        "pf_height":        "Height (ft + in)",
+        "pf_height_lbl":    "Height",
+        "pf_feet":          "Feet",
+        "pf_inches":        "Inches",
         "pf_weight":        "Weight (kg)",
         "pf_bmi":           "Estimated BMI",
         "pf_bmi_note":      "(informational only)",
@@ -219,7 +230,11 @@ T = {
         "saving_reading":   "Saving...",
         "reading_saved":    "✅ Reading saved!",
 
-        # Check-in (inside plan tab)
+        # AI Glucose analysis
+        "glucose_analysis":     "🔍 Analyse My Glucose Trends",
+        "glucose_analysis_ur":  "🔍 میری شوگر کا تجزیہ کریں",
+
+        # Check-in
         "checkin_heading":  "📋 Today's Check-In",
         "checkin_date":     "Date",
         "followed_q":       "Did you follow your meal plan today?",
@@ -258,7 +273,6 @@ T = {
 
         # Misc
         "blocked_msg":   "🔴 This feature is unavailable. Please see a clinician first.",
-        # Insulin / hypoglycaemia / weakness questions
         "q_insulin":         "Are you on insulin injections?",
         "q_insulin_help":    "This includes any insulin pen or syringe prescribed by your doctor.",
         "q_hypo":            "Do you get low blood sugar episodes?",
@@ -266,7 +280,7 @@ T = {
         "q_weakness":        "Do you feel weakness or dizziness between meals?",
         "q_weakness_help":   "For example — feeling very hungry or dizzy 2-3 hours after eating.",
 
-        # Meal structure card shown at top of plan
+        # Meal structure card
         "your_meal_plan":    "Your Personalised Meal Plan",
         "meal_structure":    "Meal Structure",
         "why_this_plan":     "Why this plan?",
@@ -282,6 +296,7 @@ T = {
         "hypo_reminder":     "⚠️ Always carry a fast sugar source (e.g. glucose tablets, juice, candy).",
 
         "db_error":      "Could not connect. Please refresh the page and try again.",
+        "setup_step":    "Setup",
     },
 
     # ─────────────────────── URDU ─────────────────────────────────────────────
@@ -328,10 +343,18 @@ T = {
         "wizard_desi":           "مجھے دیسی کھانا پسند ہے 🍛",
         "wizard_veg":            "میں سبزی خور ہوں 🥦",
         "wizard_age_note":       "عمر اور دیگر تفصیلات بعد میں بھی شامل کی جا سکتی ہیں۔",
+        "wiz_diabetes_q":        "کیا آپ کو ذیابیطس ہے؟",
+        "wiz_not_sure_warning":  (
+            "⚠️ **براہ کرم چیک کروائیں۔** غیر تشخیص شدہ ذیابیطس عام ہے اور جلد پتہ چلنے پر قابل علاج ہے۔ "
+            "اپنے ڈاکٹر یا قریبی کلینک سے ایک آسان فاسٹنگ بلڈ شوگر ٹیسٹ کروائیں — "
+            "صرف چند منٹ لگتے ہیں اور بڑا فرق پڑ سکتا ہے۔ "
+            "جب تک یقین نہ ہو، ہم آپ کا منصوبہ احتیاط کے ساتھ ترتیب دیں گے۔"
+        ),
 
         # Profile card
         "profile_card_label":  "آپ کی پروفائل",
         "edit_profile_btn":    "✏️ تبدیل کریں",
+        "editing_profile":     "پروفائل تبدیل ہو رہی ہے...",
         "save_profile_btn":    "💾 محفوظ کریں",
         "saving_profile":      "محفوظ ہو رہا ہے...",
         "profile_saved":       "✅ محفوظ! آپ کا منصوبہ اپ ڈیٹ ہو گیا۔",
@@ -353,7 +376,10 @@ T = {
         "pf_gender_opts":   ["بتانا نہیں چاہتے", "مرد", "عورت", "دیگر"],
         "pf_diabetes":      "ذیابیطس کی قسم",
         "pf_diabetes_opts": ["قسم 2", "قسم 1", "یقین نہیں"],
-        "pf_height":        "قد (سینٹی میٹر)",
+        "pf_height":        "قد (فٹ + انچ)",
+        "pf_height_lbl":    "قد",
+        "pf_feet":          "فٹ",
+        "pf_inches":        "انچ",
         "pf_weight":        "وزن (کلوگرام)",
         "pf_bmi":           "تخمینی BMI",
         "pf_bmi_note":      "(صرف معلومات)",
@@ -454,6 +480,10 @@ T = {
         "saving_reading":   "محفوظ ہو رہا ہے...",
         "reading_saved":    "✅ ریڈنگ محفوظ!",
 
+        # AI Glucose analysis
+        "glucose_analysis":     "🔍 میری شوگر کا تجزیہ کریں",
+        "glucose_analysis_ur":  "🔍 میری شوگر کا تجزیہ کریں",
+
         # Check-in
         "checkin_heading":  "📋 آج کا چیک-ان",
         "checkin_date":     "تاریخ",
@@ -493,7 +523,6 @@ T = {
 
         # Misc
         "blocked_msg":   "🔴 یہ فیچر دستیاب نہیں۔ پہلے ڈاکٹر سے ملیں۔",
-        # Insulin / hypoglycaemia / weakness questions
         "q_insulin":         "کیا آپ انسولین کے انجیکشن لیتے ہیں؟",
         "q_insulin_help":    "اس میں ڈاکٹر کی طرف سے تجویز کردہ انسولین پین یا سرنج شامل ہے۔",
         "q_hypo":            "کیا آپ کو کم شوگر کی علامات آتی ہیں؟",
@@ -516,6 +545,7 @@ T = {
         "insulin_reminder":  "💉 انسولین یاددہانی: انسولین لینے والے کبھی کھانا یا ناشتہ نہ چھوڑیں۔",
         "hypo_reminder":     "⚠️ ہمیشہ ساتھ تیز شوگر رکھیں (جیسے گلوکوز کی گولیاں، جوس، مٹھائی)۔",
 
-        "db_error":      "کنکشن نہیں ہو سکا۔ صفحہ تازہ کریں اور دوبارہ کوشش کریں۔",
+        "db_error":    "کنکشن نہیں ہو سکا۔ صفحہ تازہ کریں اور دوبارہ کوشش کریں۔",
+        "setup_step":  "سیٹ اپ",
     },
 }
