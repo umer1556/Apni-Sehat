@@ -433,27 +433,41 @@ hr { border-color: var(--border) !important; }
     font-size: 0.88rem; color: var(--txt3); line-height: 1.6;
 }
 
-/* Day accordion button */
-.day-btn .stButton > button {
+/* Day selector pill buttons */
+.day-pill .stButton > button {
     width: 100% !important;
-    text-align: left !important;
-    justify-content: space-between !important;
-    font-size: 1rem !important;
+    text-align: center !important;
+    justify-content: center !important;
+    font-size: 0.88rem !important;
     font-weight: 700 !important;
-    padding: 14px 20px !important;
-    min-height: 52px !important;
+    padding: 10px 6px !important;
+    min-height: 56px !important;
     background: var(--bg2) !important;
     border: 1px solid var(--border) !important;
-    border-left: 3px solid var(--green) !important;
-    border-radius: 8px !important;
-    color: var(--txt) !important;
-    margin-bottom: 6px !important;
+    border-radius: 10px !important;
+    color: var(--txt2) !important;
     letter-spacing: 0 !important;
+    line-height: 1.4 !important;
 }
-.day-btn .stButton > button:hover {
+.day-pill .stButton > button:hover {
     background: var(--bg3) !important;
     border-color: var(--green) !important;
     color: var(--green) !important;
+}
+.day-pill-active .stButton > button {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    padding: 10px 6px !important;
+    min-height: 56px !important;
+    background: var(--green2) !important;
+    border: 2px solid var(--green) !important;
+    border-radius: 10px !important;
+    color: #fff !important;
+    letter-spacing: 0 !important;
+    line-height: 1.4 !important;
 }
 .section-label {
     font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--txt3);
@@ -1081,54 +1095,74 @@ with tabs[0]:
 
         days  = _plan_days(); slots = _plan_slots(); lg = _lang()
 
-        if "open_days" not in ss:
-            ss["open_days"] = set()
+        # Selected day state — default to day 1
+        if "selected_day" not in ss:
+            ss["selected_day"] = 1
 
-        for day in days:
-            day_carbs = sum(day[s]["carb_servings"]*CARB["carb_serving_grams"] for s in slots if s in day)
-            day_num   = day["day"]
-            is_open   = day_num in ss["open_days"]
-            arrow     = "▲" if is_open else "▼"
-            day_label = (f"📅  Day {day_num}  ·  ~{day_carbs:.0f}g {t('carbs_label')}   {arrow}"
-                         if _lang()=="en" else
-                         f"📅  دن {day_num}  ·  ~{day_carbs:.0f}g {t('carbs_label')}   {arrow}")
+        DAY_NAMES = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
 
-            def _toggle(dn=day_num):
-                if dn in ss["open_days"]: ss["open_days"].discard(dn)
-                else:                     ss["open_days"].add(dn)
+        # ── Horizontal day selector ───────────────────────────────────────────
+        st.markdown(f"#### {'Select Day' if lg=='en' else 'دن منتخب کریں'}")
+        cols = st.columns(len(days))
+        for i, day in enumerate(days):
+            dn       = day["day"]
+            day_name = DAY_NAMES[(dn - 1) % 7]
+            is_sel   = (dn == ss["selected_day"])
+            css_cls  = "day-pill-active" if is_sel else "day-pill"
+            label    = f"{day_name}\nDay {dn}"
 
-            st.markdown('<div class="day-btn">', unsafe_allow_html=True)
-            st.button(day_label, key=f"day_tog_{day_num}",
-                      use_container_width=True, on_click=_toggle)
-            st.markdown('</div>', unsafe_allow_html=True)
+            def _select(d=dn):
+                ss["selected_day"] = d
 
-            if is_open:
-                # Meal cards
-                cards_html = ""
-                for slot in slots:
-                    if slot not in day: continue
-                    meal = day[slot]
-                    ico, le, lu = SLOT_CFG.get(slot, ("🍽️", slot.title(), slot.title()))
-                    lbl = le if lg == "en" else lu
-                    cg  = meal["carb_servings"] * CARB["carb_serving_grams"]
-                    cards_html += (
-                        f'<div class="meal-card">'
-                        f'<div class="meal-card-slot">{ico} {lbl}</div>'
-                        f'<div class="meal-card-name">{meal["name"]}</div>'
-                        f'<div class="meal-card-note">~{cg}g carbs &nbsp;·&nbsp; {meal["notes"]}</div>'
-                        f'</div>'
-                    )
-                st.markdown(cards_html, unsafe_allow_html=True)
+            with cols[i]:
+                st.markdown(f'<div class="{css_cls}">', unsafe_allow_html=True)
+                st.button(label, key=f"day_sel_{dn}",
+                          use_container_width=True, on_click=_select)
+                st.markdown('</div>', unsafe_allow_html=True)
 
-                sw_c, _ = st.columns([1, 3])
-                with sw_c:
-                    if st.button(t("swaps_btn"), key=f"sw_{day_num}", use_container_width=True):
-                        names = [day[s]["name"] for s in slots if s in day]
-                        with st.spinner(t("getting_swaps")):
-                            swaps = generate_swaps("; ".join(names))
-                        st.markdown(f"**{t('swaps_heading')}**")
-                        for s in swaps: st.write("•", s)
-            st.markdown('<div style="height:2px"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
+        st.divider()
+
+        # ── Cards for selected day ────────────────────────────────────────────
+        sel_day = next((d for d in days if d["day"] == ss["selected_day"]), days[0])
+        sel_num = sel_day["day"]
+        day_name_full = DAY_NAMES[(sel_num - 1) % 7]
+        day_carbs = sum(sel_day[s]["carb_servings"]*CARB["carb_serving_grams"]
+                        for s in slots if s in sel_day)
+
+        st.markdown(
+            f"#### 📅 {'Day' if lg=='en' else 'دن'} {sel_num} "
+            f"{'Menu' if lg=='en' else 'مینو'} — {day_name_full} "
+            f"&nbsp; <span style='font-size:0.85rem;color:var(--txt3);font-weight:400'>"
+            f"~{day_carbs:.0f}g {t('carbs_label')}</span>",
+            unsafe_allow_html=True,
+        )
+        st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
+
+        for slot in slots:
+            if slot not in sel_day: continue
+            meal = sel_day[slot]
+            ico, le, lu = SLOT_CFG.get(slot, ("🍽️", slot.title(), slot.title()))
+            lbl = le if lg == "en" else lu
+            cg  = meal["carb_servings"] * CARB["carb_serving_grams"]
+            st.markdown(
+                f'<div class="meal-card">'
+                f'<div class="meal-card-slot">{ico} {lbl}</div>'
+                f'<div class="meal-card-name">{meal["name"]}</div>'
+                f'<div class="meal-card-note">~{cg}g carbs &nbsp;·&nbsp; {meal["notes"]}</div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+
+        st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
+        sw_c, _ = st.columns([1, 3])
+        with sw_c:
+            if st.button(t("swaps_btn"), key="sw_sel", use_container_width=True):
+                names = [sel_day[s]["name"] for s in slots if s in sel_day]
+                with st.spinner(t("getting_swaps")):
+                    swaps = generate_swaps("; ".join(names))
+                st.markdown(f"**{t('swaps_heading')}**")
+                for s in swaps: st.write("•", s)
 
 
     st.divider()
