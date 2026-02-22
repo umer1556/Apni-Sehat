@@ -2,12 +2,6 @@
 
 > **Bilingual AI-powered diabetes companion for Pakistan** — personalised desi meal plans, evidence-backed health chat, blood sugar tracking, and clinical triage. Built for the 33 million Pakistanis living with diabetes.
 
-  &nbsp;
-  <a href="(https://apni-sehat-jylam9hhimsvsstqtxoutx.streamlit.app/)">
-    <img src="https://img.shields.io/badge/🌐_Live_App-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit" alt="Live App"/>
-  </a>
-</p>
-
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white"/>
   <img src="https://img.shields.io/badge/Streamlit-1.x-FF4B4B?style=flat-square&logo=streamlit&logoColor=white"/>
