@@ -1262,7 +1262,7 @@ with tabs[0]:
             ss["selected_day"] = 1
 
         DAY_NAMES    = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
-DAY_NAMES_UR = ["پیر","منگل","بدھ","جمعرات","جمعہ","ہفتہ","اتوار"]
+        DAY_NAMES_UR = ["پیر","منگل","بدھ","جمعرات","جمعہ","ہفتہ","اتوار"]
 
         # ── Horizontal day selector ───────────────────────────────────────────
         st.markdown(f"#### {'Select Day' if lg=='en' else 'دن منتخب کریں'}")
