@@ -486,6 +486,120 @@ hr { border-color: var(--border) !important; }
 # ── Helpers ───────────────────────────────────────────────────────────────────
 ss = st.session_state
 
+# ── NEW: Lightweight direct LLM caller ───────────────────────────────────────
+def _call_llm(system: str, user: str, max_tokens: int = 400) -> str:
+    try:
+        from openai import OpenAI
+        client = OpenAI(
+            api_key=os.getenv("GROQ_API_KEY", ""),
+            base_url=os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1"),
+        )
+        resp = client.chat.completions.create(
+            model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+            messages=[{"role": "system", "content": system},
+                      {"role": "user",   "content": user}],
+            max_tokens=max_tokens,
+            temperature=0.4,
+        )
+        return resp.choices[0].message.content.strip()
+    except Exception as e:
+        return f"[AI unavailable: {e}]"
+
+# ── NEW: RAG knowledge base (ADA 2024, WHO/IDF South Asian, Pakistan NCD) ────
+_RAG_KB = {
+    "carbohydrates": {
+        "keywords": ["carb","carbohydrate","sugar","glucose","roti","rice","bread","atta","starch","grams"],
+        "source": "ADA Standards of Care 2024 — Nutrition",
+        "text": ("ADA: No single ideal carb percentage for diabetes. Focus on quality — high-fibre, low-processed sources. "
+                 "45–60g carbs per meal is a practical starting point for most adults with Type 2. "
+                 "Low-GI foods (GI<55) blunt post-meal spikes. Atta roti GI≈62, white rice GI≈72, dalia GI≈41."),
+    },
+    "gi_desi_foods": {
+        "keywords": ["biryani","roti","rice","chapati","naan","paratha","daal","chana","gi","glycaemic","glycemic","lentil"],
+        "source": "GI/GL values — Foster-Powell et al. + Pakistan NCD Guidelines",
+        "text": ("South Asian GI values: basmati rice 58, biryani ≈70, atta roti 62, naan 71, paratha 74, "
+                 "daal maash 30, chana 28, rajma 29, moong daal 38. "
+                 "Legumes are excellent — low GI, high fibre, high protein."),
+    },
+    "portion_control": {
+        "keywords": ["portion","serving","how much","quantity","katori","plate","too much","cup"],
+        "source": "WHO South Asia Dietary Guidelines + ADA Plate Method",
+        "text": ("Diabetes Plate: half non-starchy vegetables, quarter lean protein, quarter quality carbs. "
+                 "1 medium atta roti ≈ 15g carbs. 1 katori (150ml) cooked rice ≈ 30g carbs. "
+                 "Target 2–4 carb servings per meal depending on meal frequency profile."),
+    },
+    "hypertension": {
+        "keywords": ["blood pressure","bp","hypertension","sodium","salt","namak","salty","heart"],
+        "source": "DASH Diet + Pakistan Hypertension Guidelines",
+        "text": ("DASH diet strongly recommended for diabetes+hypertension. Limit sodium <2300mg/day (~1 tsp salt). "
+                 "Avoid achar, papad, processed chutneys. Increase potassium: spinach, tomatoes, daal, yogurt. "
+                 "Every 10mmHg systolic reduction cuts cardiovascular risk ~20%."),
+    },
+    "cholesterol": {
+        "keywords": ["cholesterol","fat","ghee","oil","fried","saturated","lipid","heart","cardiovascular"],
+        "source": "ADA/AHA Joint Guidelines + Pakistan NCD Guidelines",
+        "text": ("Limit saturated fat <7% of calories. Replace ghee/butter with small amounts of olive or canola oil. "
+                 "Limit fried foods. Each 5–10g increase in soluble fibre (oats, isabgol, daal) reduces LDL ~5%. "
+                 "Fish 2–3x/week for omega-3. Choose low-fat dairy."),
+    },
+    "fasting_targets": {
+        "keywords": ["fasting","morning","waking","empty stomach","before breakfast","HbA1c","a1c","target","range"],
+        "source": "ADA Standards of Care 2024 — Glycaemic Targets",
+        "text": ("ADA targets: fasting/pre-meal 80–130 mg/dL, post-meal <180 mg/dL, HbA1c <7% for most adults. "
+                 "A1c of 7% = average glucose ~154 mg/dL. "
+                 "Each 1% A1c reduction cuts microvascular complication risk ~37%."),
+    },
+    "hypoglycaemia": {
+        "keywords": ["low sugar","hypo","shakiness","dizzy","sweating","low blood","under 70","below 70","hypoglycemia"],
+        "source": "ADA Hypoglycaemia Management Guidelines",
+        "text": ("Hypoglycaemia: blood glucose <70 mg/dL. Symptoms: shakiness, sweating, dizziness, confusion. "
+                 "Rule of 15: 15g fast carbs (3–4 glucose tablets or 3 tsp sugar in water), wait 15 min, recheck. "
+                 "Follow with snack if next meal >1 hour away."),
+    },
+    "exercise": {
+        "keywords": ["exercise","walk","walking","physical activity","gym","sport","movement","active","workout"],
+        "source": "ADA Physical Activity Guidelines 2024",
+        "text": ("ADA: 150 min/week moderate aerobic (brisk walking) for Type 2 diabetes. "
+                 "10–15 min walk after each meal significantly reduces post-meal glucose spikes. "
+                 "South Asian context: morning walks after Fajr prayer are culturally aligned and clinically effective."),
+    },
+    "ramadan": {
+        "keywords": ["ramadan","roza","fast","iftar","sehri","suhoor","fasting month"],
+        "source": "IDF-DAR Diabetes and Ramadan Guidelines",
+        "text": ("Type 2 on diet/metformin alone can usually fast safely with planning. "
+                 "Those on insulin face hypo risk — must consult doctor. "
+                 "Sehri: dalia, eggs, daal, atta roti — avoid sugary drinks. "
+                 "Break fast immediately if glucose <70 or >300 mg/dL."),
+    },
+    "desi_safe_foods": {
+        "keywords": ["karela","bhindi","methi","daal","chana","moong","spinach","palak","yogurt","dahi","guava","amrood"],
+        "source": "Diabetes-Friendly South Asian Foods — Clinical Review",
+        "text": ("Karela: charantin has blood-glucose-lowering properties. "
+                 "Bhindi: high soluble fibre, slows carb absorption. "
+                 "Methi dana: reduces fasting glucose and improves insulin sensitivity. "
+                 "Plain dahi: low GI, high protein — no added sugar. "
+                 "Guava (amrood): GI 12 — one of the best fruits for diabetes."),
+    },
+    "insulin_diet": {
+        "keywords": ["insulin","injection","dose","units","pen","basal","bolus","on insulin","taking insulin"],
+        "source": "ADA Insulin Management + Dietary Coordination",
+        "text": ("Meal timing is critical on insulin. Never skip a meal after taking insulin. "
+                 "Fixed insulin doses require consistent carb amounts at each meal daily. "
+                 "Bedtime snack essential to prevent overnight lows: warm low-fat milk, yogurt+nuts, or 2 crackers+peanut butter. "
+                 "Always carry fast-acting glucose."),
+    },
+}
+
+def _rag_retrieve(query: str, top_k: int = 2) -> list:
+    """Keyword-based retrieval. Returns top_k most relevant chunks."""
+    q = query.lower()
+    scored = sorted(
+        [(sum(1 for kw in c["keywords"] if kw in q), k, c)
+         for k, c in _RAG_KB.items() if any(kw in q for kw in c["keywords"])],
+        key=lambda x: -x[0]
+    )
+    return [{"source": c["source"], "text": c["text"]} for _, _, c in scored[:top_k]]
+
 def normalize_phone(p): return re.sub(r"[^\d+]", "", p.strip())
 def user_key_from_phone(p):
     salt = os.getenv("PHONE_SALT", "dev-salt-change-me")
@@ -975,8 +1089,17 @@ with tabs[0]:
                 ds  = ss.get("diabetes_type","Type 2"); di = de.index(ds) if ds in de else 0
                 edt = st.selectbox(t("pf_diabetes"), do, index=di, key="e_dtype")
 
-            ef3, ef4 = st.columns(2)
-            with ef3: eh = st.number_input(t("pf_height"), 0, 250, int(ss.get("height_cm",0) or 0), key="e_h")
+            # Convert stored cm back to ft + inches for display
+            _stored_cm = int(ss.get("height_cm", 0) or 0)
+            _total_in  = round(_stored_cm / 2.54)
+            _def_ft    = _total_in // 12
+            _def_in    = _total_in % 12
+
+            st.markdown("**Height**")
+            ef3a, ef3b, ef4 = st.columns([1, 1, 1])
+            with ef3a: e_ft = st.number_input("Feet",   0, 8,   int(ss.get("edit_height_ft", _def_ft)), key="e_ft")
+            with ef3b: e_in = st.number_input("Inches", 0, 11,  int(ss.get("edit_height_in", _def_in)), key="e_in")
+            eh = round((e_ft * 12 + e_in) * 2.54)  # convert to cm for storage
             with ef4: ew = st.number_input(t("pf_weight"), 0.0, 400.0, float(ss.get("weight_kg",0.0) or 0.0), 0.5, key="e_w")
             eb = None
             if eh > 0 and ew > 0:
@@ -1153,6 +1276,50 @@ with tabs[0]:
                 f'</div>',
                 unsafe_allow_html=True,
             )
+            # ── NEW: "Why this meal?" explainability button ───────────────────
+            why_key = f"why_{sel_num}_{slot}"
+            w_col, _ = st.columns([1, 4])
+            with w_col:
+                if st.button(
+                    "💡 " + ("Why this meal?" if lg == "en" else "یہ کھانا کیوں؟"),
+                    key=f"why_btn_{sel_num}_{slot}",
+                    use_container_width=True,
+                ):
+                    profile_str = (
+                        f"diabetes type: {ss.get('diabetes_type','Type 2')}, "
+                        f"hypertension: {ss.get('has_hypertension',False)}, "
+                        f"high cholesterol: {ss.get('has_high_cholesterol',False)}, "
+                        f"BMI: {ss.get('bmi','unknown')}, "
+                        f"on insulin: {ss.get('on_insulin',False)}"
+                    )
+                    with st.spinner("💭 Thinking..." if lg == "en" else "💭 سوچ رہا ہے..."):
+                        explanation = _call_llm(
+                            system=(
+                                "You are a clinical dietitian explaining a meal choice to a Pakistani diabetes patient. "
+                                "Be warm, brief (2–3 sentences), and specific. Reference the patient's conditions. "
+                                "Mention one glycaemic benefit and one cultural/practical benefit. "
+                                "Do NOT suggest medication changes. Do NOT diagnose. "
+                                + ("Respond in Urdu script." if lg == "ur" else "Respond in plain English.")
+                            ),
+                            user=(
+                                f"Patient profile: {profile_str}\n"
+                                f"Meal slot: {lbl}\n"
+                                f"Meal chosen: {meal['name']}\n"
+                                f"Why was this specific meal chosen for this patient?"
+                            ),
+                            max_tokens=180,
+                        )
+                    ss[why_key] = explanation
+            if ss.get(why_key):
+                st.markdown(
+                    f'<div style="background:var(--green-t);border:1px solid var(--green2);'
+                    f'border-radius:8px;padding:12px 16px;margin:-4px 0 12px 0;'
+                    f'font-size:0.95rem;line-height:1.7;color:var(--txt);">'
+                    f'<span style="font-size:0.75rem;font-weight:700;color:var(--green);'
+                    f'text-transform:uppercase;letter-spacing:0.08em;">💡 Clinical Reasoning</span><br>'
+                    f'{ss[why_key]}</div>',
+                    unsafe_allow_html=True,
+                )
 
         st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
         sw_c, _ = st.columns([1, 3])
@@ -1219,10 +1386,25 @@ with tabs[1]:
 
     user_input = st.chat_input(t("chat_placeholder"))
     if user_input:
-        ss["chat_history"].append({"role":"user","content":user_input})
+        # ── NEW: RAG retrieval — inject evidence into LLM context silently ──
+        rag_chunks = _rag_retrieve(user_input, top_k=2)
+        if rag_chunks:
+            rag_context = "\n\n".join(
+                f"[Evidence — {c['source']}]\n{c['text']}" for c in rag_chunks
+            )
+            enriched_input = (
+                f"[CLINICAL CONTEXT — use this evidence to inform your answer, "
+                f"cite the source naturally if relevant]:\n{rag_context}\n\n"
+                f"[Patient question]: {user_input}"
+            )
+        else:
+            enriched_input = user_input
+
+        ss["chat_history"].append({"role": "user", "content": user_input})
         with st.spinner(t("chat_thinking")):
-            reply = chat_with_assistant(ss["chat_history"], lang=_lang(), user_profile=_profile_context())
-        ss["chat_history"].append({"role":"assistant","content":reply})
+            history_for_llm = ss["chat_history"][:-1] + [{"role": "user", "content": enriched_input}]
+            reply = chat_with_assistant(history_for_llm, lang=_lang(), user_profile=_profile_context())
+        ss["chat_history"].append({"role": "assistant", "content": reply})
         st.rerun()
 
     if ss["chat_history"]:
@@ -1326,5 +1508,79 @@ with tabs[3]:
             st.dataframe(df.rename(columns={"measured_at":t("col_time"),"type":t("col_type"),
                                             "value":t("col_val"),"meal_note":t("col_note")}),
                          use_container_width=True)
+
+        # ── NEW: AI Glucose Trend Analysis ────────────────────────────────────
+        st.divider()
+        st.markdown("### 🤖 " + ("AI Trend Analysis" if _lang()=="en" else "AI رجحان تجزیہ"))
+        st.caption(
+            "AI-powered pattern analysis of your readings — not a diagnosis." if _lang()=="en"
+            else "آپ کی ریڈنگز کا AI تجزیہ — یہ تشخیص نہیں ہے۔"
+        )
+        if st.button(
+            "🔍 " + ("Analyse My Glucose Trends" if _lang()=="en" else "میری گلوکوز رجحانات کا تجزیہ کریں"),
+            key="ai_glucose_btn", type="primary"
+        ):
+            df_sorted = df.sort_values("measured_at")
+            recent    = df_sorted.tail(14).copy()
+            recent["hour"] = recent["measured_at"].dt.hour
+            morning_avg   = recent[recent["hour"].between(5, 10)]["value"].mean()
+            afternoon_avg = recent[recent["hour"].between(11,16)]["value"].mean()
+            evening_avg   = recent[recent["hour"].between(17,22)]["value"].mean()
+            type_avgs = recent.groupby("type")["value"].mean().to_dict()
+            type_str  = "; ".join(f"{k}: {v:.0f} mg/dL" for k,v in type_avgs.items())
+            y = recent["value"].tolist()
+            slope = (y[-1] - y[0]) / max(len(y)-1, 1) if len(y) >= 2 else 0
+            trend_dir = "improving (decreasing)" if slope < -2 else ("worsening (increasing)" if slope > 2 else "stable")
+            readings_str = "\n".join(
+                f"  {row['measured_at'].strftime('%Y-%m-%d %H:%M')} | {row['type']} | {row['value']:.0f} mg/dL"
+                + (f" | note: {row['meal_note']}" if row.get("meal_note") else "")
+                for _, row in recent.iterrows()
+            )
+            profile_str = (
+                f"Name: {ss.get('name','Patient')}, Age: {ss.get('age','?')}, "
+                f"Diabetes: {ss.get('diabetes_type','Type 2')}, "
+                f"Hypertension: {ss.get('has_hypertension',False)}, "
+                f"On insulin: {ss.get('on_insulin',False)}, BMI: {ss.get('bmi','?')}"
+            )
+            lang = _lang()
+            with st.spinner("🧠 Analysing your patterns..." if lang=="en" else "🧠 آپ کے نمونوں کا تجزیہ ہو رہا ہے..."):
+                analysis = _call_llm(
+                    system=(
+                        "You are a clinical endocrinologist reviewing a diabetes patient's glucose log. "
+                        "Provide a structured analysis in exactly this format:\n\n"
+                        "**PATTERN SUMMARY** (2 sentences)\n\n"
+                        "**TIME-OF-DAY INSIGHTS** (1-2 sentences)\n\n"
+                        "**3 SPECIFIC RECOMMENDATIONS** (numbered, actionable, desi-context-aware)\n\n"
+                        "**WATCH OUT FOR** (1 sentence — biggest risk in this data)\n\n"
+                        "Be specific, reference actual numbers. Never diagnose or suggest medication changes. "
+                        + ("Respond in Urdu script." if lang=="ur" else "Respond in English.")
+                    ),
+                    user=(
+                        f"Patient: {profile_str}\n\n"
+                        f"Stats (last {len(recent)} readings): "
+                        f"Average {avg:.0f} mg/dL | Variability ±{std:.0f} | "
+                        f"High (≥{TRIAGE['very_high']}): {hc} | Low (<{TRIAGE['hypo']}): {lc}\n"
+                        f"Trend: {trend_dir} | By type: {type_str}\n"
+                        f"Morning avg: {morning_avg:.0f} | Afternoon: {afternoon_avg:.0f} | Evening: {evening_avg:.0f}\n\n"
+                        f"Recent readings:\n{readings_str}"
+                    ),
+                    max_tokens=600,
+                )
+            ss["glucose_analysis"] = analysis
+
+        if ss.get("glucose_analysis"):
+            st.markdown(
+                f'<div style="background:var(--bg2);border:1px solid var(--border);'
+                f'border-top:3px solid var(--green);border-radius:10px;'
+                f'padding:20px 24px;margin-top:8px;line-height:1.85;">'
+                f'{ss["glucose_analysis"].replace(chr(10),"<br>")}'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+            st.caption(
+                "⚠️ AI analysis is for awareness only — not a clinical diagnosis. Share with your doctor."
+                if _lang()=="en" else
+                "⚠️ AI تجزیہ صرف آگاہی کے لیے ہے — طبی تشخیص نہیں۔ اپنے ڈاکٹر سے شیئر کریں۔"
+            )
 
     st.markdown(f'<div class="footer">⚠️ {APP["disclaimer"]}</div>', unsafe_allow_html=True)
