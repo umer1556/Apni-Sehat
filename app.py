@@ -59,29 +59,78 @@ st.markdown("""
     color-scheme: dark;
 }
 
-/* ═══ 1. Sidebar + Expander icon fix ═══ */
-/* Use maximum specificity to beat Streamlit's own stylesheet */
-html body .stApp .material-symbols-rounded,
-html body .material-symbols-rounded,
-.material-symbols-rounded {
-    font-size: 0px !important;
-    width: 0px !important;
-    height: 0px !important;
-    display: inline-block !important;
-    overflow: hidden !important;
-    color: transparent !important;
-    line-height: 0 !important;
-    opacity: 0 !important;
-}
-/* Sidebar */
+/* ═══ 1. Sidebar collapse button ═══ */
+/* Hide ONLY the icon text inside these two specific buttons.
+   We scope to [data-testid] so other Material Icons elsewhere are untouched.
+   Then we draw a CSS chevron via ::after as the visible indicator. */
+
+/* Make the button a clean fixed square */
 [data-testid="stSidebarCollapseButton"] button,
 [data-testid="collapsedControl"] button {
     background: var(--bg3) !important;
     border: 1px solid var(--border) !important;
     border-radius: 6px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: visible !important;
 }
-[data-testid="stSidebarCollapseButton"] svg,
-[data-testid="collapsedControl"] svg { fill: var(--txt2) !important; }
+
+/* Hide the ligature text / SVG inside — but NOT the button itself */
+[data-testid="stSidebarCollapseButton"] button span,
+[data-testid="stSidebarCollapseButton"] button svg,
+[data-testid="collapsedControl"] button span,
+[data-testid="collapsedControl"] button svg {
+    font-size: 0 !important;
+    color: transparent !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    opacity: 0 !important;
+}
+
+/* Draw a left-pointing chevron for the collapse button (sidebar open) */
+[data-testid="stSidebarCollapseButton"] button::after {
+    content: '' !important;
+    display: block !important;
+    width: 8px !important;
+    height: 8px !important;
+    border-left: 2px solid var(--txt2) !important;
+    border-bottom: 2px solid var(--txt2) !important;
+    transform: rotate(45deg) !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 52% !important;
+    margin-top: -4px !important;
+    margin-left: -4px !important;
+}
+
+/* Draw a right-pointing chevron for the expand button (sidebar collapsed) */
+[data-testid="collapsedControl"] button::after {
+    content: '' !important;
+    display: block !important;
+    width: 8px !important;
+    height: 8px !important;
+    border-right: 2px solid var(--txt2) !important;
+    border-bottom: 2px solid var(--txt2) !important;
+    transform: rotate(-45deg) !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 46% !important;
+    margin-top: -4px !important;
+    margin-left: -4px !important;
+}
+
+[data-testid="stSidebarCollapseButton"] button:hover::after,
+[data-testid="collapsedControl"] button:hover::after {
+    border-color: var(--green) !important;
+}
 
 /* ═══ 2. Expander layout ═══ */
 [data-testid="stExpander"] summary {
@@ -137,32 +186,32 @@ html, body { background:var(--bg) !important; font-family:'Inter',sans-serif !im
 /* ═══ 4. Typography ═══ */
 p, li, span, div, label, .stMarkdown p, .stMarkdown li {
     font-family:'Inter',sans-serif !important;
-    font-size:0.98rem !important;
-    line-height:1.75 !important;
+    font-size:1.15rem !important;
+    line-height:1.9 !important;
     color:var(--txt) !important;
 }
-h1 { font-size:1.9rem !important; font-weight:800 !important; color:var(--green) !important; letter-spacing:-0.5px !important; }
-h2 { font-size:1.4rem !important; font-weight:700 !important; color:var(--green) !important; }
-h3 { font-size:1.1rem !important; font-weight:700 !important; color:var(--txt) !important; }
+h1 { font-size:2.2rem !important; font-weight:800 !important; color:var(--green) !important; letter-spacing:-0.5px !important; }
+h2 { font-size:1.65rem !important; font-weight:700 !important; color:var(--green) !important; }
+h3 { font-size:1.3rem !important; font-weight:700 !important; color:var(--txt) !important; }
 [data-testid="stMarkdownContainer"] h1,
 [data-testid="stMarkdownContainer"] h2 { color:var(--green) !important; }
-.stCaption, [data-testid="stCaptionContainer"] p { font-size:0.82rem !important; color:var(--txt3) !important; }
+.stCaption, [data-testid="stCaptionContainer"] p { font-size:1.15rem !important; color:var(--txt3) !important; }
 
 /* ═══ 5. Sidebar ═══ */
 [data-testid="stSidebar"], [data-testid="stSidebar"] > div, [data-testid="stSidebarContent"] {
     background:var(--bg2) !important; border-right:1px solid var(--border) !important;
 }
 [data-testid="stSidebar"] * { color:var(--txt) !important; font-family:'Inter',sans-serif !important; }
-[data-testid="stSidebar"] h2 { color:var(--green) !important; font-size:1.1rem !important; font-weight:700 !important; }
-[data-testid="stSidebar"] .stCaption p { color:var(--txt3) !important; font-size:0.78rem !important; }
+[data-testid="stSidebar"] h2 { color:var(--green) !important; font-size:1.3rem !important; font-weight:700 !important; }
+[data-testid="stSidebar"] .stCaption p { color:var(--txt3) !important; font-size:1.3rem !important; }
 [data-testid="stSidebar"] hr { border-color:var(--border) !important; margin:12px 0 !important; }
 
 /* ═══ 6. Buttons ═══ */
 .stButton > button[kind="primary"] {
     background:var(--green) !important; color:#0a1a0f !important; border:none !important;
     border-radius:10px !important; font-family:'Inter',sans-serif !important;
-    font-size:0.95rem !important; font-weight:700 !important;
-    padding:0.6rem 1.8rem !important; min-height:44px !important;
+    font-size:1.3rem !important; font-weight:700 !important;
+    padding:0.6rem 1.8rem !important; min-height:52px !important;
     width:auto !important; letter-spacing:0.01em !important; transition:all 0.18s ease !important;
 }
 .stButton > button[kind="secondary"] {
@@ -180,7 +229,7 @@ h3 { font-size:1.1rem !important; font-weight:700 !important; color:var(--txt) !
 .stButton > button {
     background:var(--bg3) !important; color:var(--green) !important;
     border:1px solid var(--border) !important; border-radius:10px !important;
-    font-family:'Inter',sans-serif !important; font-size:0.9rem !important;
+    font-family:'Inter',sans-serif !important; font-size:1.05rem !important;
     font-weight:600 !important; min-height:40px !important;
     padding:0.5rem 1.2rem !important; transition:all 0.15s ease !important;
 }
@@ -191,8 +240,8 @@ h3 { font-size:1.1rem !important; font-weight:700 !important; color:var(--txt) !
 .stTextArea textarea, [data-baseweb="input"] input, [data-baseweb="textarea"] textarea {
     background:var(--bg3) !important; color:var(--txt) !important;
     border:1px solid var(--border) !important; border-radius:8px !important;
-    font-family:'Inter',sans-serif !important; font-size:0.95rem !important;
-    padding:0.55rem 0.9rem !important; min-height:44px !important;
+    font-family:'Inter',sans-serif !important; font-size:1.3rem !important;
+    padding:0.55rem 0.9rem !important; min-height:52px !important;
 }
 .stTextInput > div > div > input:focus, .stTextArea textarea:focus {
     border-color:var(--green) !important; box-shadow:0 0 0 2px rgba(34,197,94,0.18) !important;
@@ -201,7 +250,7 @@ h3 { font-size:1.1rem !important; font-weight:700 !important; color:var(--txt) !
 .stTextInput label, .stNumberInput label, .stTextArea label, .stSelectbox label,
 .stDateInput label, .stTimeInput label, .stRadio label > div > p,
 .stMultiSelect label, [data-testid="stFormLabel"] p {
-    color:var(--txt2) !important; font-size:0.83rem !important; font-weight:600 !important;
+    color:var(--txt2) !important; font-size:1.15rem !important; font-weight:600 !important;
     letter-spacing:0.04em !important; text-transform:uppercase !important;
 }
 
@@ -214,16 +263,16 @@ h3 { font-size:1.1rem !important; font-weight:700 !important; color:var(--txt) !
 [data-baseweb="popover"] [role="listbox"], [data-baseweb="menu"] {
     background:var(--bg3) !important; border:1px solid var(--border) !important; border-radius:8px !important;
 }
-[data-baseweb="menu"] li { color:var(--txt) !important; font-size:0.95rem !important; }
+[data-baseweb="menu"] li { color:var(--txt) !important; font-size:1.3rem !important; }
 [data-baseweb="menu"] li:hover { background:#1E2D1E !important; }
 
 /* ═══ 9. Checkboxes / Radio / Toggle ═══ */
 .stCheckbox label, .stCheckbox span, [data-testid="stCheckbox"] label {
-    color:var(--txt) !important; font-size:0.95rem !important;
+    color:var(--txt) !important; font-size:1.3rem !important;
     font-weight:400 !important; text-transform:none !important;
 }
-.stRadio label, .stRadio div[role="radiogroup"] label { color:var(--txt) !important; font-size:0.95rem !important; }
-.stToggle label p { color:var(--txt) !important; font-size:0.95rem !important; }
+.stRadio label, .stRadio div[role="radiogroup"] label { color:var(--txt) !important; font-size:1.3rem !important; }
+.stToggle label p { color:var(--txt) !important; font-size:1.3rem !important; }
 
 /* ═══ 10. Date / Time ═══ */
 input[type="date"], input[type="time"] {
@@ -237,9 +286,9 @@ input[type="date"], input[type="time"] {
 }
 .stTabs [data-baseweb="tab"] {
     background:transparent !important; color:var(--txt3) !important;
-    font-family:'Inter',sans-serif !important; font-size:0.88rem !important;
+    font-family:'Inter',sans-serif !important; font-size:1.05rem !important;
     font-weight:600 !important; padding:12px 18px !important;
-    border-bottom:2px solid transparent !important; min-height:46px !important;
+    border-bottom:2px solid transparent !important; min-height:52px !important;
 }
 .stTabs [aria-selected="true"] {
     color:var(--green) !important; border-bottom:2px solid var(--green) !important; font-weight:700 !important;
@@ -260,8 +309,8 @@ input[type="date"], input[type="time"] {
     background:var(--bg2) !important; border:1px solid var(--border) !important;
     border-radius:12px !important; padding:14px 18px !important;
 }
-[data-testid="stMetricValue"] { font-size:1.8rem !important; font-weight:800 !important; color:var(--green) !important; }
-[data-testid="stMetricLabel"] { color:var(--txt2) !important; font-size:0.8rem !important; font-weight:600 !important; text-transform:uppercase !important; letter-spacing:0.05em !important; }
+[data-testid="stMetricValue"] { font-size:2.1rem !important; font-weight:800 !important; color:var(--green) !important; }
+[data-testid="stMetricLabel"] { color:var(--txt2) !important; font-size:1.3rem !important; font-weight:600 !important; text-transform:uppercase !important; letter-spacing:0.05em !important; }
 [data-testid="stMetricDelta"]  { color:var(--txt3) !important; }
 
 /* ═══ 14. Alerts ═══ */
@@ -299,7 +348,7 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
     margin-top:4px !important; letter-spacing:0 !important;
 }
 .login-hero-sub {
-    font-size:1.08rem !important; color:var(--txt2) !important;
+    font-size:1.25rem !important; color:var(--txt2) !important;
     margin-top:12px !important; display:block !important; font-weight:400 !important;
 }
 
@@ -307,12 +356,12 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
     background:linear-gradient(135deg,#052e16,#0f3d1c);
     border:1px solid #16A34A; border-radius:14px;
     padding:18px 22px; margin-bottom:20px;
-    font-size:0.96rem; line-height:1.75;
+    font-size:1.15rem; line-height:1.9;
     box-shadow:0 2px 12px rgba(34,197,94,0.12);
 }
 .tip-banner * { color:#D1FAE5 !important; }
 .tip-label {
-    font-size:0.68rem; font-weight:700; letter-spacing:0.14em;
+    font-size:0.88rem; font-weight:700; letter-spacing:0.14em;
     text-transform:uppercase; color:var(--green-hi) !important;
     margin-bottom:6px; display:block;
 }
@@ -322,25 +371,25 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
     border-left:4px solid var(--green); border-radius:12px;
     padding:16px 22px; margin-bottom:18px;
 }
-.profile-name { font-size:1.1rem; font-weight:700; color:#F0FFF4 !important; }
-.profile-detail { font-size:0.88rem; color:var(--txt2) !important; margin-top:4px; }
+.profile-name { font-size:1.3rem; font-weight:700; color:#F0FFF4 !important; }
+.profile-detail { font-size:1.05rem; color:var(--txt2) !important; margin-top:4px; }
 
-.badge-g { background:#052e16; color:#4ADE80 !important; border:1px solid #16A34A; border-radius:6px; padding:3px 12px; font-weight:700; font-size:0.82rem; display:inline-block; }
-.badge-a { background:#1c1000; color:#FCD34D !important; border:1px solid #F59E0B; border-radius:6px; padding:3px 12px; font-weight:700; font-size:0.82rem; display:inline-block; }
-.badge-r { background:#1a0505; color:#FCA5A5 !important; border:1px solid #EF4444; border-radius:6px; padding:3px 12px; font-weight:700; font-size:0.82rem; display:inline-block; }
-.badge-n { background:var(--bg3); color:var(--txt3) !important; border:1px solid var(--border); border-radius:6px; padding:3px 12px; font-weight:700; font-size:0.82rem; display:inline-block; }
+.badge-g { background:#052e16; color:#4ADE80 !important; border:1px solid #16A34A; border-radius:6px; padding:3px 12px; font-weight:700; font-size:1.15rem; display:inline-block; }
+.badge-a { background:#1c1000; color:#FCD34D !important; border:1px solid #F59E0B; border-radius:6px; padding:3px 12px; font-weight:700; font-size:1.15rem; display:inline-block; }
+.badge-r { background:#1a0505; color:#FCA5A5 !important; border:1px solid #EF4444; border-radius:6px; padding:3px 12px; font-weight:700; font-size:1.15rem; display:inline-block; }
+.badge-n { background:var(--bg3); color:var(--txt3) !important; border:1px solid var(--border); border-radius:6px; padding:3px 12px; font-weight:700; font-size:1.15rem; display:inline-block; }
 
 .bubble-user {
     background:#1a2e1a; border:1px solid #16A34A; border-radius:16px 16px 4px 16px;
     padding:14px 18px; margin:8px 0; margin-left:10%;
-    font-size:0.96rem; line-height:1.75; color:#D1FAE5 !important;
+    font-size:1.15rem; line-height:1.9; color:#D1FAE5 !important;
 }
 .bubble-bot {
     background:var(--bg2); border:1px solid var(--border); border-radius:16px 16px 16px 4px;
     padding:14px 18px; margin:8px 0; margin-right:10%;
-    font-size:0.96rem; line-height:1.75; color:var(--txt) !important;
+    font-size:1.15rem; line-height:1.9; color:var(--txt) !important;
 }
-.bubble-label { font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--txt3) !important; margin-bottom:4px; }
+.bubble-label { font-size:0.88rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--txt3) !important; margin-bottom:4px; }
 
 .wizard-box {
     background:var(--bg2); border:1px solid var(--border);
@@ -352,7 +401,7 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
 .step-pill {
     background:#052e16; color:var(--green-hi) !important;
     border:1px solid #16A34A; border-radius:20px;
-    padding:4px 14px; font-size:0.75rem; font-weight:700;
+    padding:4px 14px; font-size:0.92rem; font-weight:700;
     display:inline-block; margin-bottom:14px; letter-spacing:0.04em;
 }
 
@@ -360,31 +409,31 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
     background:var(--bg2); border:1px solid var(--border); border-radius:14px;
     padding:24px 26px; height:100%;
 }
-.feature-card p { color:var(--txt) !important; font-size:0.96rem !important; margin:8px 0 !important; }
-.feature-card .disc { color:var(--txt3) !important; font-size:0.83rem !important; }
+.feature-card p { color:var(--txt) !important; font-size:1.15rem !important; margin:8px 0 !important; }
+.feature-card .disc { color:var(--txt3) !important; font-size:1.15rem !important; }
 
 .sb-disc {
     background:#110e00; border:1px solid #3a2800;
     border-left:3px solid var(--amber);
     border-radius:8px; padding:12px 14px; margin-top:2px;
 }
-.sb-disc p { color:var(--txt2) !important; font-size:0.78rem !important; line-height:1.65 !important; margin:2px 0 !important; text-transform:none !important; letter-spacing:0 !important; }
+.sb-disc p { color:var(--txt2) !important; font-size:1.3rem !important; line-height:1.85 !important; margin:2px 0 !important; text-transform:none !important; letter-spacing:0 !important; }
 .sb-disc strong { color:#FCD34D !important; }
-.sb-disc-title { font-size:0.82rem !important; font-weight:700 !important; color:var(--amber) !important; margin-bottom:6px !important; }
+.sb-disc-title { font-size:1.15rem !important; font-weight:700 !important; color:var(--amber) !important; margin-bottom:6px !important; }
 
-.meal-slot { font-size:0.82rem; font-weight:700; color:var(--green) !important; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:2px; }
+.meal-slot { font-size:1.15rem; font-weight:700; color:var(--green) !important; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:2px; }
 .meal-card { background:var(--bg2); border:1px solid var(--border); border-top:3px solid var(--green); border-radius:10px; padding:18px 20px; margin-bottom:12px; font-family:'Inter',sans-serif; }
-.meal-card-slot { font-size:0.73rem; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px; font-family:'Inter',sans-serif; }
-.meal-card-name { font-size:1rem; font-weight:700; color:var(--txt); line-height:1.4; margin-bottom:10px; font-family:'Inter',sans-serif; }
-.meal-card-meta { display:inline-block; background:var(--green-t); color:var(--green); border:1px solid var(--green2); border-radius:4px; padding:2px 8px; font-size:0.78rem; font-weight:700; margin-bottom:8px; font-family:'Inter',sans-serif; }
-.meal-card-note { font-size:0.88rem; color:var(--txt3); line-height:1.6; font-family:'Inter',sans-serif; }
+.meal-card-slot { font-size:0.9rem; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px; font-family:'Inter',sans-serif; }
+.meal-card-name { font-size:1.15rem; font-weight:700; color:var(--txt); line-height:1.6; margin-bottom:10px; font-family:'Inter',sans-serif; }
+.meal-card-meta { display:inline-block; background:var(--green-t); color:var(--green); border:1px solid var(--green2); border-radius:4px; padding:2px 8px; font-size:0.95rem; font-weight:700; margin-bottom:8px; font-family:'Inter',sans-serif; }
+.meal-card-note { font-size:1.05rem; color:var(--txt3); line-height:1.8; font-family:'Inter',sans-serif; }
 .section-label {
-    font-size:0.72rem; font-weight:700; color:var(--txt3) !important;
+    font-size:0.9rem; font-weight:700; color:var(--txt3) !important;
     text-transform:uppercase; letter-spacing:0.1em;
     border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:14px;
 }
 
-.footer { font-size:0.78rem; color:var(--txt3) !important; text-align:center; padding:12px 0; border-top:1px solid var(--border); margin-top:32px; }
+.footer { font-size:0.95rem; color:var(--txt3) !important; text-align:center; padding:12px 0; border-top:1px solid var(--border); margin-top:32px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -724,31 +773,6 @@ if not ss.get("week_plan"):
             bmi=ss.get("bmi"), diabetes_type=ss.get("diabetes_type","Type 2"))
 
 
-# Late CSS injection — appears after Streamlit's own styles in DOM, guaranteed to win
-st.markdown("""
-<style>
-html body .material-symbols-rounded,
-html body span.material-symbols-rounded {
-    font-size: 0px !important;
-    width: 0px !important;
-    height: 0px !important;
-    overflow: hidden !important;
-    opacity: 0 !important;
-    color: transparent !important;
-    display: inline-block !important;
-}
-[data-testid="stExpanderToggleIcon"],
-[data-testid="stExpanderToggleIcon"] * {
-    font-size: 0px !important;
-    width: 0px !important;
-    height: 0px !important;
-    overflow: hidden !important;
-    opacity: 0 !important;
-    position: absolute !important;
-    color: transparent !important;
-}
-</style>
-""", unsafe_allow_html=True)
 
 tabs = st.tabs([t("tab_plan"), t("tab_chat"), t("tab_glucose"), t("tab_dashboard")])
 
@@ -914,67 +938,122 @@ with tabs[0]:
 
         days  = _plan_days(); slots = _plan_slots(); lg = _lang()
 
-        # ── Day selector pill buttons ─────────────────────────────────────────
-        if "selected_day" not in ss or ss["selected_day"] > len(days):
-            ss["selected_day"] = 1
+        # ── Pure HTML/JS meal plan — zero st.rerun(), instant day switching ──
+        def _card_html(slot, meal, lg_):
+            ico, le, lu = SLOT_CFG.get(slot, ("🍽️", slot.title(), slot.title()))
+            lbl = le if lg_ == "en" else lu
+            cg  = meal["carb_servings"] * CARB["carb_serving_grams"]
+            return (
+                '<div class="meal-card">'
+                f'<div class="meal-card-slot">{ico} {lbl}</div>'
+                f'<div class="meal-card-name">{meal["name"]}</div>'
+                f'<div class="meal-card-meta">~{cg}g carbs</div>'
+                f'<div class="meal-card-note">{meal["notes"]}</div>'
+                '</div>'
+            )
 
-        sel = ss["selected_day"]
-        btn_cols = st.columns(len(days))
-        for i, d in enumerate(days):
-            dnum = d["day"]
-            d_carbs = sum(d[s]["carb_servings"]*CARB["carb_serving_grams"] for s in slots if s in d)
-            label   = (f"Day {dnum}" if lg=="en" else f"دن {dnum}")
-            with btn_cols[i]:
-                # Active day gets green primary styling; others default
-                if st.button(label, key=f"daypill_{dnum}",
-                             use_container_width=True,
-                             type="primary" if dnum==sel else "secondary"):
-                    ss["selected_day"] = dnum; st.rerun()
+        btn_parts  = []
+        days_parts = []
 
-        st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
+        for i, day in enumerate(days):
+            dnum     = day["day"]
+            d_carbs  = sum(day[s]["carb_servings"]*CARB["carb_serving_grams"] for s in slots if s in day)
+            dlabel   = f"Day {dnum}" if lg == "en" else f"\u062f\u0646 {dnum}"
+            summary  = (f"\U0001f4c5 Day {dnum}  \u00b7  ~{d_carbs:.0f}g {t('carbs_label')}"
+                        if lg == "en" else
+                        f"\U0001f4c5 \u062f\u0646 {dnum}  \u00b7  ~{d_carbs:.0f}g {t('carbs_label')}")
+            active   = ' active' if i == 0 else ''
+            display  = 'block' if i == 0 else 'none'
 
-        # ── Selected day summary bar ──────────────────────────────────────────
-        day     = days[sel - 1]
-        day_carbs = sum(day[s]["carb_servings"]*CARB["carb_serving_grams"] for s in slots if s in day)
-        day_label = (f"📅 Day {sel}  ·  ~{day_carbs:.0f}g {t('carbs_label')}"
-                     if lg=="en" else
-                     f"📅 دن {sel}  ·  ~{day_carbs:.0f}g {t('carbs_label')}")
+            btn_parts.append(
+                f'<button class="day-btn{active}" onclick="apniSelectDay({dnum},this)">'
+                f'{dlabel}</button>'
+            )
+
+            meal_items = [(s, day[s]) for s in slots if s in day]
+            cards = "".join(_card_html(s, m, lg) for s, m in meal_items)
+
+            days_parts.append(
+                f'<div class="day-panel" id="apni-day-{dnum}" style="display:{display}">'
+                f'<div class="day-summary-bar">{summary}</div>'
+                f'<div class="meal-grid">{cards}</div>'
+                f'</div>'
+            )
+
+        plan_css = (
+            "<style>"
+            ".day-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}"
+            ".day-btn{flex:1;min-width:52px;padding:11px 4px;"
+            "background:#161b22;color:#8b949e;"
+            "border:1px solid #30363d;border-radius:8px;"
+            "font-family:'Inter',sans-serif;font-size:1rem;font-weight:600;"
+            "cursor:pointer;transition:all 0.12s ease;white-space:nowrap;}"
+            ".day-btn:hover{border-color:#3fb950;color:#3fb950;}"
+            ".day-btn.active{background:#3fb950;color:#0a1a0f;"
+            "border-color:#3fb950;font-weight:700;}"
+            ".day-summary-bar{background:#161b22;border:1px solid #30363d;"
+            "border-left:3px solid #3fb950;border-radius:8px;"
+            "padding:13px 20px;margin-bottom:16px;"
+            "font-weight:700;font-size:1.12rem;color:#e6edf3;"
+            "font-family:'Inter',sans-serif;}"
+            ".meal-grid{display:grid;grid-template-columns:repeat(2,1fr);"
+            "gap:12px;margin-bottom:4px;}"
+            "@media(max-width:600px){.meal-grid{grid-template-columns:1fr;}}"
+            ".meal-card{background:#161b22;border:1px solid #30363d;"
+            "border-top:3px solid #3fb950;border-radius:10px;"
+            "padding:16px 18px;font-family:'Inter',sans-serif;}"
+            ".meal-card-slot{font-size:0.9rem;font-weight:700;"
+            "color:#3fb950;text-transform:uppercase;"
+            "letter-spacing:0.1em;margin-bottom:7px;}"
+            ".meal-card-name{font-size:1.12rem;font-weight:700;"
+            "color:#e6edf3;line-height:1.55;margin-bottom:8px;}"
+            ".meal-card-meta{display:inline-block;"
+            "background:rgba(63,185,80,0.15);color:#3fb950;"
+            "border:1px solid #3fb950;border-radius:4px;"
+            "padding:3px 10px;font-size:0.92rem;font-weight:700;margin-bottom:8px;}"
+            ".meal-card-note{font-size:1.02rem;color:#9ca3af;line-height:1.78;}"
+            "</style>"
+        )
+
+        plan_js = (
+            "<script>"
+            "function apniSelectDay(dnum,btn){"
+            "document.querySelectorAll('.day-panel').forEach(function(p){"
+            "p.style.display='none';});"
+            "document.querySelectorAll('.day-btn').forEach(function(b){"
+            "b.classList.remove('active');});"
+            "var p=document.getElementById('apni-day-'+dnum);"
+            "if(p)p.style.display='block';"
+            "btn.classList.add('active');}"
+            "</script>"
+        )
+
         st.markdown(
-            f'<div style="background:var(--bg2);border:1px solid var(--border);'
-            f'border-left:3px solid var(--green);border-radius:8px;'
-            f'padding:10px 18px;margin-bottom:16px;font-weight:700;'
-            f'font-size:1rem;color:var(--txt);">{day_label}</div>',
-            unsafe_allow_html=True)
+            plan_css
+            + '<div class="day-strip">' + "".join(btn_parts) + '</div>'
+            + "".join(days_parts)
+            + plan_js,
+            unsafe_allow_html=True
+        )
 
-        # ── Meal cards grid ───────────────────────────────────────────────────
-        meal_items = [(slot, day[slot]) for slot in slots if slot in day]
-        # Lay out in rows of 2 cards each
-        for row_start in range(0, len(meal_items), 2):
-            row = meal_items[row_start:row_start+2]
-            cols = st.columns(len(row))
-            for col, (slot, meal) in zip(cols, row):
-                ico, le, lu = SLOT_CFG.get(slot, ("🍽️", slot.title(), slot.title()))
-                lbl = le if lg=="en" else lu
-                cg  = meal["carb_servings"] * CARB["carb_serving_grams"]
-                with col:
-                    st.markdown(
-                        f'<div class="meal-card">'
-                        f'<div class="meal-card-slot">{ico} {lbl}</div>'
-                        f'<div class="meal-card-name">{meal["name"]}</div>'
-                        f'<div class="meal-card-meta">~{cg}g carbs</div>'
-                        f'<div class="meal-card-note">{meal["notes"]}</div>'
-                        f'</div>',
-                        unsafe_allow_html=True)
-
-        # ── Swap suggestions for selected day ─────────────────────────────────
-        st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
-        sw_c, _ = st.columns([1, 3])
+        # ── Swap suggestions (AI call — still needs one server round-trip) ────
+        st.markdown('<div style="height:4px"></div>', unsafe_allow_html=True)
+        sw_c, sc, _ = st.columns([1, 1, 2])
         with sw_c:
-            if st.button(t("swaps_btn"), key=f"sw_{sel}", use_container_width=True):
-                names = [day[s]["name"] for s in slots if s in day]
+            swap_day = st.selectbox(
+                "Day" if lg == "en" else "\u062f\u0646",
+                options=[d["day"] for d in days],
+                format_func=lambda x: (f"Day {x}" if lg == "en" else f"\u062f\u0646 {x}"),
+                key="swap_day_sel",
+                label_visibility="collapsed",
+            )
+        with sc:
+            if st.button(t("swaps_btn"), key="sw_btn", use_container_width=True):
+                day_for_swap = days[swap_day - 1]
+                names = [day_for_swap[s]["name"] for s in slots if s in day_for_swap]
                 with st.spinner(t("getting_swaps")):
                     swaps = generate_swaps("; ".join(names))
-                st.markdown(f"**{t('swaps_heading')}**")
+                st.markdown(f"**{t('swaps_heading')} — Day {swap_day}**")
                 for s in swaps: st.write("•", s)
 
     st.divider()
