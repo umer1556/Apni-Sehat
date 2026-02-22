@@ -59,12 +59,9 @@ st.markdown("""
     color-scheme: dark;
 }
 
-/* ═══ 1. Sidebar collapse button ═══ */
-/* Hide ONLY the icon text inside these two specific buttons.
-   We scope to [data-testid] so other Material Icons elsewhere are untouched.
-   Then we draw a CSS chevron via ::after as the visible indicator. */
+/* ═══ 1. Sidebar collapse / expand buttons ═══ */
 
-/* Make the button a clean fixed square */
+/* Base button style — fixed 32×32 square, flex centred, no padding */
 [data-testid="stSidebarCollapseButton"] button,
 [data-testid="collapsedControl"] button {
     background: var(--bg3) !important;
@@ -78,69 +75,52 @@ st.markdown("""
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    overflow: visible !important;
-}
-
-/* Hide the ligature text / SVG inside — but NOT the button itself */
-[data-testid="stSidebarCollapseButton"] button span,
-[data-testid="stSidebarCollapseButton"] button svg,
-[data-testid="collapsedControl"] button span,
-[data-testid="collapsedControl"] button svg {
+    overflow: hidden !important;
+    /* Zero out font on the button itself — kills direct text nodes
+       AND any child that inherits, regardless of tag */
     font-size: 0 !important;
     color: transparent !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-    position: absolute !important;
-    opacity: 0 !important;
+    line-height: 0 !important;
 }
 
-/* Draw a left-pointing chevron for the collapse button (sidebar open) */
+/* Hide every possible child element (span, svg, p, div, i …) */
+[data-testid="stSidebarCollapseButton"] button > *,
+[data-testid="collapsedControl"] button > * {
+    display: none !important;
+}
+
+/* Left-pointing chevron — sidebar open, collapse button */
 [data-testid="stSidebarCollapseButton"] button::after {
-    content: '' !important;
+    content: "" !important;
     display: block !important;
     width: 8px !important;
     height: 8px !important;
-    border-left: 2px solid var(--txt2) !important;
-    border-bottom: 2px solid var(--txt2) !important;
+    border-left: 2.5px solid var(--txt2) !important;
+    border-bottom: 2.5px solid var(--txt2) !important;
     transform: rotate(45deg) !important;
     position: absolute !important;
     top: 50% !important;
-    left: 52% !important;
+    left: 55% !important;
     margin-top: -4px !important;
     margin-left: -4px !important;
+    flex-shrink: 0 !important;
 }
 
-/* Draw a right-pointing chevron for the expand button (sidebar collapsed) */
+/* Right-pointing chevron — sidebar collapsed, expand button */
 [data-testid="collapsedControl"] button::after {
-    content: '' !important;
+    content: "" !important;
     display: block !important;
     width: 8px !important;
     height: 8px !important;
-    border-right: 2px solid var(--txt2) !important;
-    border-bottom: 2px solid var(--txt2) !important;
+    border-right: 2.5px solid var(--txt2) !important;
+    border-bottom: 2.5px solid var(--txt2) !important;
     transform: rotate(-45deg) !important;
     position: absolute !important;
     top: 50% !important;
-    left: 46% !important;
+    left: 42% !important;
     margin-top: -4px !important;
     margin-left: -4px !important;
-}
-
-/* collapsedControl lives outside the sidebar in the main page DOM.
-   Target every possible child element that could carry the ligature text. */
-[data-testid="collapsedControl"] button *,
-[data-testid="collapsedControl"] button span,
-[data-testid="collapsedControl"] button p,
-[data-testid="collapsedControl"] span {
-    font-size: 0 !important;
-    color: transparent !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-    position: absolute !important;
-    opacity: 0 !important;
-    display: block !important;
+    flex-shrink: 0 !important;
 }
 
 [data-testid="stSidebarCollapseButton"] button:hover::after,
