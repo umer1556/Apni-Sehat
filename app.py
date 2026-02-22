@@ -660,6 +660,50 @@ def _plan_profile():
     p = ss.get("week_plan")
     return p.get("profile") if isinstance(p, dict) else None
 
+# ── Urdu translations for meal notes (from meal bank English notes) ──────────
+# Keys are exact English note strings returned by planner/meal_bank.
+# Values are Urdu translations for display when lg == "ur".
+_NOTES_UR = {
+    # Breakfast
+    "High protein and fibre. Very gentle on blood sugar.": "زیادہ پروٹین اور فائبر۔ بلڈ شوگر کے لیے بہت محفوظ۔",
+    "High protein, slow-digesting. Keeps you full longer.": "زیادہ پروٹین، آہستہ ہضم ہوتا ہے۔ دیر تک پیٹ بھرا رہتا ہے۔",
+    "High fibre, low GI. Add nuts for protein.": "زیادہ فائبر، کم گلائسیمک انڈیکس۔ گری دار میوے شامل کریں۔",
+    "Complex carbs + protein combo. Slow glucose release.": "پیچیدہ کاربس اور پروٹین۔ شوگر آہستہ آہستہ بڑھتی ہے۔",
+    "Very low GI. High protein. Filling and blood-sugar friendly.": "بہت کم GI۔ زیادہ پروٹین۔ پیٹ بھرنے والا اور بلڈ شوگر کے لیے اچھا۔",
+    "Good fats + protein. Very low carb impact.": "اچھی چکنائی اور پروٹین۔ کاربس کا بہت کم اثر۔",
+    "Low GI, high fibre. Very filling.": "کم GI، زیادہ فائبر۔ بہت پیٹ بھرنے والا۔",
+    "Anti-inflammatory. Good fat. Very low carb.": "سوزش کم کرتا ہے۔ اچھی چکنائی۔ کاربس بہت کم۔",
+    # Snacks
+    "High protein, no carbs. Very blood-sugar safe.": "زیادہ پروٹین، کاربس نہیں۔ بلڈ شوگر کے لیے بالکل محفوظ۔",
+    "Slow digesting protein + fat. No sugar spike.": "آہستہ ہضم ہونے والا پروٹین اور چکنائی۔ شوگر نہیں بڑھتی۔",
+    "Low GI. High protein and fibre.": "کم GI۔ زیادہ پروٹین اور فائبر۔",
+    "Good fats, fibre, very low GI. A handful only.": "اچھی چکنائی، فائبر، بہت کم GI۔ صرف ایک مٹھی۔",
+    "Low GI fruit. High fibre. Rich in vitamin C.": "کم GI پھل۔ زیادہ فائبر۔ وٹامن سی سے بھرپور۔",
+    "Low GI. Filling. Good for blood sugar.": "کم GI۔ پیٹ بھرنے والا۔ بلڈ شوگر کے لیے اچھا۔",
+    "Cooling, filling and blood-sugar friendly.": "ٹھنڈا، پیٹ بھرنے والا اور بلڈ شوگر کے لیے اچھا۔",
+    "Low GI. Rich in antioxidants and fibre.": "کم GI۔ اینٹی آکسیڈینٹس اور فائبر سے بھرپور۔",
+    "Low GI. Good fats. Heart healthy.": "کم GI۔ اچھی چکنائی۔ دل کے لیے فائدہ مند۔",
+    "Complex carbs + protein. Prevents overnight dip.": "پیچیدہ کاربس اور پروٹین۔ رات میں شوگر گرنے سے بچاتا ہے۔",
+    "Slow protein. Bedtime safe for insulin users.": "آہستہ پروٹین۔ انسولین استعمال کرنے والوں کے لیے سونے سے پہلے محفوظ۔",
+    "Protein + fat. Stable overnight glucose.": "پروٹین اور چکنائی۔ رات بھر شوگر مستحکم رکھتا ہے۔",
+    # Lunch / Dinner
+    "Chickpeas are excellent for blood sugar. Avoid too much oil.": "چنے بلڈ شوگر کے لیے بہترین ہیں۔ زیادہ تیل سے بچیں۔",
+    "Legumes lower blood sugar. Keep roti to 1 medium.": "دالیں بلڈ شوگر کم کرتی ہیں۔ روٹی ایک درمیانی رکھیں۔",
+    "Low GI daal. Protein rich. Avoid heavy tarka.": "کم GI دال۔ پروٹین سے بھرپور۔ بھاری تڑکے سے بچیں۔",
+    "Excellent protein and fibre. Low GI.": "بہترین پروٹین اور فائبر۔ کم GI۔",
+    "Excellent blood sugar control. Avoid too much ghee.": "بلڈ شوگر کنٹرول کے لیے بہترین۔ زیادہ گھی سے بچیں۔",
+    "High protein. No carb impact. Ask for less oil.": "زیادہ پروٹین۔ کاربس کا اثر نہیں۔ کم تیل مانگیں۔",
+    "Ask for less oil. Atta roti instead of naan.": "کم تیل مانگیں۔ نان کی جگہ آٹے کی روٹی لیں۔",
+    "Lean protein. Low carb. Blood-sugar safe.": "دبلا پروٹین۔ کاربس کم۔ بلڈ شوگر کے لیے محفوظ۔",
+    "High protein, very low GI. Filling dinner.": "زیادہ پروٹین، بہت کم GI۔ پیٹ بھرنے والا رات کا کھانا۔",
+    "Iron + folate + protein. Blood sugar friendly.": "آئرن، فولیٹ اور پروٹین۔ بلڈ شوگر کے لیے فائدہ مند۔",
+    "Very low GI. High fibre. Anti-inflammatory.": "بہت کم GI۔ زیادہ فائبر۔ سوزش کم کرتا ہے۔",
+    "Rice is high GI — keep to half katori. Add raita.": "چاول زیادہ GI والے ہیں — آدھی کٹوری رکھیں۔ رائتہ شامل کریں۔",
+    "Omega-3 + protein. Heart and blood-sugar friendly.": "اومیگا-3 اور پروٹین۔ دل اور بلڈ شوگر کے لیے فائدہ مند۔",
+    "Bitter melon lowers blood sugar naturally.": "کریلا قدرتی طور پر بلڈ شوگر کم کرتا ہے۔",
+    "Okra has blood sugar lowering properties.": "بھنڈی بلڈ شوگر کم کرنے کی خاصیت رکھتی ہے۔",
+}
+
 SLOT_CFG = {
     "breakfast": ("🌅","Breakfast","ناشتہ"),
     "snack_am":  ("🍎","Mid-Morning Snack","دوپہر سے پہلے کا ناشتہ"),
@@ -863,15 +907,15 @@ if ss.get("setup_step") in (1, 2):
                 gender_opts = ["Prefer not to say", "Male", "Female", "Other"]
                 saved_g     = ss.get("gender", "Prefer not to say")
                 g_idx       = gender_opts.index(saved_g) if saved_g in gender_opts else 0
-                gender_v    = st.selectbox("Gender", gender_opts, index=g_idx)
+                gender_v    = st.selectbox(t("pf_gender"), gender_opts, index=g_idx)
 
-            st.markdown("**Height**")
+            st.markdown(f"**{t('pf_height_lbl')}**")
             col_ft, col_in = st.columns(2)
             with col_ft:
-                height_ft = st.number_input("Feet", 0, 8,
+                height_ft = st.number_input(t("pf_feet"), 0, 8,
                     int(ss.get("height_ft", 5)), key="wiz_ft")
             with col_in:
-                height_in = st.number_input("Inches", 0, 11,
+                height_in = st.number_input(t("pf_inches"), 0, 11,
                     int(ss.get("height_in", 6)), key="wiz_in")
             height_cm_calc = round((height_ft * 12 + height_in) * 2.54)
 
@@ -889,15 +933,10 @@ if ss.get("setup_step") in (1, 2):
             d_opts  = ["Type 1", "Type 2", "Not sure / not diagnosed"]
             saved_d = ss.get("diabetes_type", "Type 2")
             d_idx   = d_opts.index(saved_d) if saved_d in d_opts else 1
-            dtype_d = st.selectbox("Do you have diabetes?", d_opts, index=d_idx)
+            dtype_d = st.selectbox(t("wiz_diabetes_q"), d_opts, index=d_idx)
 
             if dtype_d == "Not sure / not diagnosed":
-                st.warning(
-                    "⚠️ **Please get checked.** Undiagnosed diabetes is common and manageable "
-                    "when caught early. Visit your doctor or a nearby clinic for a simple fasting "
-                    "blood sugar test — it takes just a few minutes and could make a big difference. "
-                    "We will treat your plan cautiously until you know for sure."
-                )
+                st.warning(t("wiz_not_sure_warning"))
 
             st.divider()
             pref = st.checkbox(t("wizard_desi"), value=ss.get("prefer_desi", True))
@@ -1095,10 +1134,10 @@ with tabs[0]:
             _def_ft    = _total_in // 12
             _def_in    = _total_in % 12
 
-            st.markdown("**Height**")
+            st.markdown(f"**{t('pf_height_lbl')}**")
             ef3a, ef3b, ef4 = st.columns([1, 1, 1])
-            with ef3a: e_ft = st.number_input("Feet",   0, 8,   int(ss.get("edit_height_ft", _def_ft)), key="e_ft")
-            with ef3b: e_in = st.number_input("Inches", 0, 11,  int(ss.get("edit_height_in", _def_in)), key="e_in")
+            with ef3a: e_ft = st.number_input(t("pf_feet"),   0, 8,   int(ss.get("edit_height_ft", _def_ft)), key="e_ft")
+            with ef3b: e_in = st.number_input(t("pf_inches"), 0, 11,  int(ss.get("edit_height_in", _def_in)), key="e_in")
             eh = round((e_ft * 12 + e_in) * 2.54)  # convert to cm for storage
             with ef4: ew = st.number_input(t("pf_weight"), 0.0, 400.0, float(ss.get("weight_kg",0.0) or 0.0), 0.5, key="e_w")
             eb = None
@@ -1222,26 +1261,96 @@ with tabs[0]:
         if "selected_day" not in ss:
             ss["selected_day"] = 1
 
-        DAY_NAMES = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+        DAY_NAMES    = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+DAY_NAMES_UR = ["پیر","منگل","بدھ","جمعرات","جمعہ","ہفتہ","اتوار"]
 
         # ── Horizontal day selector ───────────────────────────────────────────
         st.markdown(f"#### {'Select Day' if lg=='en' else 'دن منتخب کریں'}")
+
+        # Build day button labels (Urdu-aware)
+        _day_word = "Day" if lg == "en" else "دن"
+        active_dn = ss["selected_day"]
+
+        # Inject JS that runs after render to highlight the active button.
+        # We match by the button's data-testid key which Streamlit sets reliably.
+        # This avoids nth-child ambiguity when multiple column groups exist on page.
+        st.markdown(f"""
+<script>
+(function() {{
+    function highlightActive() {{
+        var activeKey = "day_sel_{active_dn}";
+        document.querySelectorAll('.stButton > button').forEach(function(btn) {{
+            var parent = btn.closest('[data-testid="stBaseButton-secondary"]') ||
+                         btn.closest('[data-testid]');
+            // Match by aria-label or closest key attribute
+            btn.style.removeProperty('background');
+            btn.style.removeProperty('border');
+            btn.style.removeProperty('color');
+            btn.style.removeProperty('font-weight');
+        }});
+        // Target by key: Streamlit sets data-testid on the wrapper
+        var target = document.querySelector('[data-testid="baseButton-secondary"][key="day_sel_{active_dn}"]');
+        if (!target) {{
+            // Fallback: find by button text containing active day number
+            document.querySelectorAll('.stButton > button').forEach(function(btn) {{
+                if (btn.textContent.includes('{_day_word}') && btn.textContent.includes('{active_dn}')) {{
+                    btn.style.setProperty('background', '#2ea043', 'important');
+                    btn.style.setProperty('border', '2px solid #3fb950', 'important');
+                    btn.style.setProperty('color', '#ffffff', 'important');
+                    btn.style.setProperty('font-weight', '700', 'important');
+                }}
+            }});
+        }}
+    }}
+    // Run now and after a short delay for Streamlit's async rendering
+    highlightActive();
+    setTimeout(highlightActive, 120);
+    setTimeout(highlightActive, 400);
+}})();
+</script>
+<style>
+/* Fallback CSS: active day pill — targets button whose text contains active day */
+button[kind="secondary"]:has(+ * [data-active="true"]) {{
+    background: #2ea043 !important;
+}}
+</style>
+""", unsafe_allow_html=True)
+
         cols = st.columns(len(days))
         for i, day in enumerate(days):
             dn       = day["day"]
-            day_name = DAY_NAMES[(dn - 1) % 7]
-            is_sel   = (dn == ss["selected_day"])
-            css_cls  = "day-pill-active" if is_sel else "day-pill"
-            label    = f"{day_name}\nDay {dn}"
+            day_name = (DAY_NAMES_UR if lg == "ur" else DAY_NAMES)[(dn - 1) % 7]
+            is_active = (dn == active_dn)
+            label    = f"{day_name}\n{_day_word} {dn}"
 
             def _select(d=dn):
                 ss["selected_day"] = d
 
             with cols[i]:
-                st.markdown(f'<div class="{css_cls}">', unsafe_allow_html=True)
+                # Wrap active button in a div with a unique id so CSS can target it reliably
+                if is_active:
+                    st.markdown(f'<div id="daypill-active-{dn}" class="daypill-active-wrapper">', unsafe_allow_html=True)
                 st.button(label, key=f"day_sel_{dn}",
                           use_container_width=True, on_click=_select)
-                st.markdown('</div>', unsafe_allow_html=True)
+                if is_active:
+                    st.markdown('</div>', unsafe_allow_html=True)
+
+        # CSS targeting the wrapper div — guaranteed to surround only the active button
+        st.markdown(f"""
+<style>
+.daypill-active-wrapper .stButton > button {{
+    background: #2ea043 !important;
+    border: 2px solid #3fb950 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 0 3px rgba(63,185,80,0.25) !important;
+}}
+.daypill-active-wrapper .stButton > button:hover {{
+    background: #3fb950 !important;
+    color: #ffffff !important;
+}}
+</style>
+""", unsafe_allow_html=True)
 
         st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
         st.divider()
@@ -1249,7 +1358,7 @@ with tabs[0]:
         # ── Cards for selected day ────────────────────────────────────────────
         sel_day = next((d for d in days if d["day"] == ss["selected_day"]), days[0])
         sel_num = sel_day["day"]
-        day_name_full = DAY_NAMES[(sel_num - 1) % 7]
+        day_name_full = (DAY_NAMES_UR if lg == "ur" else DAY_NAMES)[(sel_num - 1) % 7]
         day_carbs = sum(sel_day[s]["carb_servings"]*CARB["carb_serving_grams"]
                         for s in slots if s in sel_day)
 
@@ -1272,7 +1381,7 @@ with tabs[0]:
                 f'<div class="meal-card">'
                 f'<div class="meal-card-slot">{ico} {lbl}</div>'
                 f'<div class="meal-card-name">{meal["name"]}</div>'
-                f'<div class="meal-card-note">~{cg}g carbs &nbsp;·&nbsp; {meal["notes"]}</div>'
+                f'<div class="meal-card-note">~{cg}{"گرام کاربس" if lg=="ur" else "g carbs"} &nbsp;·&nbsp; {_NOTES_UR.get(meal["notes"], meal["notes"]) if lg=="ur" else meal["notes"]}</div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
