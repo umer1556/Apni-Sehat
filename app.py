@@ -192,13 +192,16 @@ div.block-container,
     border-color: var(--green) !important;
     color: var(--green) !important;
 }
-.stButton > button[kind="primary"] {
+/* Primary buttons — cover both old (kind attr) and new (data-testid) Streamlit */
+.stButton > button[kind="primary"],
+[data-testid="stBaseButton-primary"] {
     background: var(--green2) !important;
     color: #fff !important;
     border: none !important;
     font-weight: 700 !important;
 }
-.stButton > button[kind="primary"]:hover {
+.stButton > button[kind="primary"]:hover,
+[data-testid="stBaseButton-primary"]:hover {
     background: var(--green) !important;
     transform: translateY(-1px) !important;
     box-shadow: 0 4px 14px var(--green-t) !important;
@@ -1315,51 +1318,6 @@ with tabs[0]:
         _day_word = "Day" if lg == "en" else "دن"
         active_dn = ss["selected_day"]
 
-        # Inject JS that runs after render to highlight the active button.
-        # We match by the button's data-testid key which Streamlit sets reliably.
-        # This avoids nth-child ambiguity when multiple column groups exist on page.
-        st.markdown(f"""
-<script>
-(function() {{
-    function highlightActive() {{
-        var activeKey = "day_sel_{active_dn}";
-        document.querySelectorAll('.stButton > button').forEach(function(btn) {{
-            var parent = btn.closest('[data-testid="stBaseButton-secondary"]') ||
-                         btn.closest('[data-testid]');
-            // Match by aria-label or closest key attribute
-            btn.style.removeProperty('background');
-            btn.style.removeProperty('border');
-            btn.style.removeProperty('color');
-            btn.style.removeProperty('font-weight');
-        }});
-        // Target by key: Streamlit sets data-testid on the wrapper
-        var target = document.querySelector('[data-testid="baseButton-secondary"][key="day_sel_{active_dn}"]');
-        if (!target) {{
-            // Fallback: find by button text containing active day number
-            document.querySelectorAll('.stButton > button').forEach(function(btn) {{
-                if (btn.textContent.includes('{_day_word}') && btn.textContent.includes('{active_dn}')) {{
-                    btn.style.setProperty('background', '#2ea043', 'important');
-                    btn.style.setProperty('border', '2px solid #3fb950', 'important');
-                    btn.style.setProperty('color', '#ffffff', 'important');
-                    btn.style.setProperty('font-weight', '700', 'important');
-                }}
-            }});
-        }}
-    }}
-    // Run now and after a short delay for Streamlit's async rendering
-    highlightActive();
-    setTimeout(highlightActive, 120);
-    setTimeout(highlightActive, 400);
-}})();
-</script>
-<style>
-/* Fallback CSS: active day pill — targets button whose text contains active day */
-button[kind="secondary"]:has(+ * [data-active="true"]) {{
-    background: #2ea043 !important;
-}}
-</style>
-""", unsafe_allow_html=True)
-
         cols = st.columns(len(days))
         for i, day in enumerate(days):
             dn       = day["day"]
@@ -1371,28 +1329,28 @@ button[kind="secondary"]:has(+ * [data-active="true"]) {{
                 ss["selected_day"] = d
 
             with cols[i]:
-                # Wrap active button in a div with a unique id so CSS can target it reliably
+                # Wrap the active button in a div so CSS can target it reliably
                 if is_active:
-                    st.markdown(f'<div id="daypill-active-{dn}" class="daypill-active-wrapper">', unsafe_allow_html=True)
+                    st.markdown(f'<div class="daypill-active-wrapper">', unsafe_allow_html=True)
                 st.button(label, key=f"day_sel_{dn}",
                           use_container_width=True, on_click=_select)
                 if is_active:
                     st.markdown('</div>', unsafe_allow_html=True)
 
-        # CSS targeting the wrapper div — guaranteed to surround only the active button
-        st.markdown(f"""
+        # CSS: green active pill — targets only the wrapped button
+        st.markdown("""
 <style>
-.daypill-active-wrapper .stButton > button {{
+.daypill-active-wrapper .stButton > button {
     background: #2ea043 !important;
     border: 2px solid #3fb950 !important;
     color: #ffffff !important;
     font-weight: 700 !important;
     box-shadow: 0 0 0 3px rgba(63,185,80,0.25) !important;
-}}
-.daypill-active-wrapper .stButton > button:hover {{
+}
+.daypill-active-wrapper .stButton > button:hover {
     background: #3fb950 !important;
     color: #ffffff !important;
-}}
+}
 </style>
 """, unsafe_allow_html=True)
 
