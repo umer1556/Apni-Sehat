@@ -258,6 +258,22 @@ h3 { font-size:1.3rem !important; font-weight:700 !important; color:var(--txt) !
 [data-baseweb="select"] > div {
     background:var(--bg3) !important; color:var(--txt) !important;
     border:1px solid var(--border) !important; border-radius:8px !important;
+    min-height:52px !important; display:flex !important; align-items:center !important;
+}
+/* Fix sunken text — reset padding so value sits vertically centred */
+[data-baseweb="select"] > div > div {
+    padding-top:0 !important; padding-bottom:0 !important;
+    display:flex !important; align-items:center !important;
+    line-height:1.2 !important;
+}
+/* Value text */
+[data-baseweb="select"] > div [data-testid="stSelectboxValue"],
+[data-baseweb="select"] > div > div > div {
+    padding-top:0 !important; padding-bottom:0 !important;
+    margin-top:0 !important; margin-bottom:0 !important;
+    color:var(--txt) !important; font-size:1.1rem !important;
+    display:flex !important; align-items:center !important;
+    line-height:1.2 !important;
 }
 [data-baseweb="select"] span, [data-baseweb="select"] div { color:var(--txt) !important; }
 [data-baseweb="popover"] [role="listbox"], [data-baseweb="menu"] {
@@ -433,6 +449,8 @@ hr { border-color:var(--border) !important; margin:16px 0 !important; }
     border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:14px;
 }
 
+.apni-day-hidden { position:absolute; opacity:0; pointer-events:none; height:0; overflow:hidden; }
+.apni-day-hidden * { height:0 !important; min-height:0 !important; padding:0 !important; margin:0 !important; }
 .footer { font-size:0.95rem; color:var(--txt3) !important; text-align:center; padding:12px 0; border-top:1px solid var(--border); margin-top:32px; }
 </style>
 """, unsafe_allow_html=True)
@@ -973,10 +991,13 @@ with tabs[0]:
             meal_items = [(s, day[s]) for s in slots if s in day]
             cards = "".join(_card_html(s, m, lg) for s, m in meal_items)
 
+            swap_lbl = "💡 Suggest swaps" if lg == "en" else "💡 متبادل تجویز کریں"
             days_parts.append(
                 f'<div class="day-panel" id="apni-day-{dnum}" style="display:{display}">'
                 f'<div class="day-summary-bar">{summary}</div>'
                 f'<div class="meal-grid">{cards}</div>'
+                f'<button class="swap-btn" onclick="apniRequestSwap({dnum})"'
+                f' id="swap-btn-{dnum}">{swap_lbl}</button>'
                 f'</div>'
             )
 
@@ -1012,19 +1033,37 @@ with tabs[0]:
             "border:1px solid #3fb950;border-radius:4px;"
             "padding:3px 10px;font-size:0.92rem;font-weight:700;margin-bottom:8px;}"
             ".meal-card-note{font-size:1.02rem;color:#9ca3af;line-height:1.78;}"
+            ".swap-btn{display:block;width:100%;margin-top:14px;padding:12px 0;"
+            "background:transparent;color:#3fb950;"
+            "border:1px solid #3fb950;border-radius:8px;"
+            "font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;"
+            "cursor:pointer;transition:all 0.15s ease;letter-spacing:0.02em;}"
+            ".swap-btn:hover{background:rgba(63,185,80,0.12);}"
             "</style>"
         )
 
         plan_js = (
             "<script>"
+            "var _apniDay=1;"
             "function apniSelectDay(dnum,btn){"
-            "document.querySelectorAll('.day-panel').forEach(function(p){"
-            "p.style.display='none';});"
-            "document.querySelectorAll('.day-btn').forEach(function(b){"
-            "b.classList.remove('active');});"
+            "_apniDay=dnum;"
+            "document.querySelectorAll('.day-panel').forEach(function(p){p.style.display='none';});"
+            "document.querySelectorAll('.day-btn').forEach(function(b){b.classList.remove('active');});"
             "var p=document.getElementById('apni-day-'+dnum);"
             "if(p)p.style.display='block';"
-            "btn.classList.add('active');}"
+            "btn.classList.add('active');"
+            "var hi=window.parent.document.querySelector('.apni-day-hidden input');"
+            "if(hi){hi.value=dnum;hi.dispatchEvent(new Event('input',{bubbles:true}));"
+            "hi.dispatchEvent(new Event('change',{bubbles:true}));}"
+            "}"
+            "function apniRequestSwap(dnum){"
+            "var hi=window.parent.document.querySelector('.apni-day-hidden input');"
+            "if(hi){hi.value=dnum;hi.dispatchEvent(new Event('input',{bubbles:true}));"
+            "hi.dispatchEvent(new Event('change',{bubbles:true}));}"
+            "setTimeout(function(){"
+            "var sb=window.parent.document.querySelector('.apni-swap-btn button');"
+            "if(sb)sb.click();"
+            "},150);}"
             "</script>"
         )
 
@@ -1036,25 +1075,43 @@ with tabs[0]:
             unsafe_allow_html=True
         )
 
-        # ── Swap suggestions (AI call — still needs one server round-trip) ────
-        st.markdown('<div style="height:4px"></div>', unsafe_allow_html=True)
-        sw_c, sc, _ = st.columns([1, 1, 2])
-        with sw_c:
-            swap_day = st.selectbox(
-                "Day" if lg == "en" else "\u062f\u0646",
-                options=[d["day"] for d in days],
-                format_func=lambda x: (f"Day {x}" if lg == "en" else f"\u062f\u0646 {x}"),
-                key="swap_day_sel",
-                label_visibility="collapsed",
+        # ── Swap suggestions — "💡 Suggest swaps" lives inside each day panel ────
+        # JS updates .apni-day-hidden input with the clicked day, then clicks .apni-swap-btn
+        # We wrap both in st.markdown div containers that JS can find by class
+
+        # Hidden day number receiver
+        st.markdown('<div class="apni-day-hidden">', unsafe_allow_html=True)
+        swap_trigger_day = st.number_input(
+            "_swap_trigger", min_value=1, max_value=7, value=1,
+            step=1, key="swap_trigger_day",
+            label_visibility="collapsed"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Hidden trigger button (JS clicks this)
+        st.markdown('<div class="apni-swap-btn" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden;">', unsafe_allow_html=True)
+        _do_swap = st.button("⚡", key="sw_hidden_btn")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        if _do_swap:
+            day_for_swap = days[int(swap_trigger_day) - 1]
+            names = [day_for_swap[s]["name"] for s in slots if s in day_for_swap]
+            day_lbl = f"Day {int(swap_trigger_day)}" if lg == "en" else f"دن {int(swap_trigger_day)}"
+            with st.spinner(t("getting_swaps")):
+                swaps = generate_swaps("; ".join(names))
+            st.markdown(
+                f'<div style="background:var(--bg2);border:1px solid var(--border);'
+                f'border-left:3px solid var(--green);border-radius:8px;padding:18px 22px;margin-top:12px;">'
+                f'<div style="font-weight:700;color:var(--green);font-size:1.05rem;margin-bottom:12px;">'
+                f'💡 {t("swaps_heading")} — {day_lbl}</div>'
+                + "".join(
+                    f'<div style="padding:8px 0;border-bottom:1px solid var(--border);'
+                    f'color:var(--txt);font-size:1rem;line-height:1.65;">• {s}</div>'
+                    for s in swaps
+                )
+                + '</div>',
+                unsafe_allow_html=True
             )
-        with sc:
-            if st.button(t("swaps_btn"), key="sw_btn", use_container_width=True):
-                day_for_swap = days[swap_day - 1]
-                names = [day_for_swap[s]["name"] for s in slots if s in day_for_swap]
-                with st.spinner(t("getting_swaps")):
-                    swaps = generate_swaps("; ".join(names))
-                st.markdown(f"**{t('swaps_heading')} — Day {swap_day}**")
-                for s in swaps: st.write("•", s)
 
     st.divider()
 
