@@ -863,6 +863,8 @@ with tabs[1]:
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  TAB 2 — LOG SUGAR
+#  PKT fix: seed date/time defaults once from UTC+5; widget keys preserve the
+#  user's manual edits across reruns without re-evaluating datetime.now().
 # ══════════════════════════════════════════════════════════════════════════════
 with tabs[2]:
     st.markdown(f"## 📊 {t('glucose_heading')}")
@@ -870,11 +872,20 @@ with tabs[2]:
     if _blocked():
         st.error(t("blocked_msg"))
     else:
+        # Seed PKT defaults once per session
+        if "gl_date_init" not in ss:
+            _now_pkt = _pkt_now()
+            ss["glucose_log_date"] = _now_pkt.date()
+            ss["glucose_log_time"] = _now_pkt.time().replace(second=0, microsecond=0)
+            ss["gl_date_init"] = True
+
         c1,c2=st.columns(2)
         with c1:
-            r_type =st.selectbox(t("reading_lbl"),t("reading_types"))
-            m_date =st.date_input(t("date_lbl"),value=date.today())
-            m_time =st.time_input(t("time_lbl"),value=datetime.now().time())
+            r_type=st.selectbox(t("reading_lbl"),t("reading_types"))
+            # No value= argument — Streamlit reads from session_state key,
+            # so the user's manual edits survive every rerun.
+            m_date=st.date_input(t("date_lbl"), key="glucose_log_date")
+            m_time=st.time_input(t("time_lbl"), key="glucose_log_time")
         with c2:
             value    =st.number_input(t("value_lbl"),0.0,600.0,110.0,1.0)
             meal_note=st.text_input(t("note_lbl"),placeholder=t("note_ph"))
@@ -884,7 +895,12 @@ with tabs[2]:
         sb,_=st.columns([1,3])
         with sb:
             if st.button("Save Reading" if _lang()=="en" else "ریڈنگ محفوظ کریں",type="primary",use_container_width=True):
-                with st.spinner(t("saving_reading")): add_glucose_log(user,datetime.combine(m_date,m_time),r_type,value,meal_note)
+                with st.spinner(t("saving_reading")):
+                    add_glucose_log(user,datetime.combine(m_date,m_time),r_type,value,meal_note)
+                # Reset defaults to current PKT for the next entry
+                _now_pkt = _pkt_now()
+                ss["glucose_log_date"] = _now_pkt.date()
+                ss["glucose_log_time"] = _now_pkt.time().replace(second=0, microsecond=0)
                 st.success(t("reading_saved"))
     st.markdown(f'<div class="footer">⚠️ {APP["disclaimer"]}</div>',unsafe_allow_html=True)
 
