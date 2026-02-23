@@ -431,10 +431,10 @@ Built at the **HEC Generative AI Hackathon**:
 
 | Name | Role | GitHub |
 |---|---|---|
-| Muhammed Umer | Front-end developer | [@umer1556](https://github.com/umer1556) |
-| Zunaira Hawar | Front-end developer | [@zunairakhan123](https://github.com/zunairakhan123) |
-| Jaisha Khan | Back-end developer | [@jaishakhan](https://github.com/jaishakhan) |
-| Muhammad Husnain | Back-end developer | [@MuhammadHusnain572](https://github.com/MuhammadHusnain572) |
+| Muhammed Umer | Back-end developer | [@umer1556](https://github.com/umer1556) |
+| Zunaira Hawar | Back-end developer | [@zunairakhan123](https://github.com/zunairakhan123) |
+| Jaisha Khan | Front-end developer | [@jaishakhan](https://github.com/jaishakhan) |
+| Muhammad Husnain | Front-end developer | [@MuhammadHusnain572](https://github.com/MuhammadHusnain572) |
 | Dr. Fatima Farhat | Clinical advisor | [@docffarhat-prog](https://github.com/docffarhat-prog) |
 
 > *"The clinical triage thresholds, meal frequency profiles, and safety routing logic were developed and reviewed in consultation with Dr. Fatima Farhat to ensure the app's guidance is clinically appropriate for Pakistani patients managing diabetes."*
