@@ -1,6 +1,6 @@
 # app.py  –  Apni Sehat v1.2
 import os, re, hashlib
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import List, Optional
 
 import streamlit as st
@@ -874,7 +874,7 @@ with tabs[2]:
     else:
         # Seed PKT defaults once per session
         if "gl_date_init" not in ss:
-            _now_pkt = _pkt_now()
+            _now_pkt = datetime.utcnow() + timedelta(hours=5)
             ss["glucose_log_date"] = _now_pkt.date()
             ss["glucose_log_time"] = _now_pkt.time().replace(second=0, microsecond=0)
             ss["gl_date_init"] = True
@@ -898,7 +898,7 @@ with tabs[2]:
                 with st.spinner(t("saving_reading")):
                     add_glucose_log(user,datetime.combine(m_date,m_time),r_type,value,meal_note)
                 # Reset defaults to current PKT for the next entry
-                _now_pkt = _pkt_now()
+                _now_pkt = datetime.utcnow() + timedelta(hours=5)
                 ss["glucose_log_date"] = _now_pkt.date()
                 ss["glucose_log_time"] = _now_pkt.time().replace(second=0, microsecond=0)
                 st.success(t("reading_saved"))
