@@ -196,7 +196,6 @@ ss = st.session_state
 
 # ── Triage flag translations — exact strings produced by triage.py ────────────
 _FLAG_UR = {
-    # RED
     "Other major conditions selected. Please consult a clinician before using this app for dietary changes.":
         "دیگر بڑی بیماریاں منتخب کی گئی ہیں۔ خوراک میں تبدیلی سے پہلے ڈاکٹر سے مشورہ کریں۔",
     "Blood pressure is in a severe range. Please seek urgent medical care.":
@@ -207,7 +206,6 @@ _FLAG_UR = {
         "بہت زیادہ فاسٹنگ گلوکوز ریکارڈ ہوئی۔ ڈاکٹر سے مشورہ کریں۔",
     "Large variation in recent fasting readings — please see a clinician.":
         "حالیہ فاسٹنگ ریڈنگز میں بہت زیادہ فرق — ڈاکٹر سے ملیں۔",
-    # AMBER
     "Type 1 diabetes: this app provides dietary support only — never adjust insulin or medication based on this app.":
         "قسم 1 ذیابیطس: یہ ایپ صرف خوراک کی رہنمائی دیتی ہے — اس ایپ کی بنیاد پر انسولین یا دوا کبھی تبدیل نہ کریں۔",
     "Blood pressure is elevated. Clinician follow-up recommended.":
@@ -230,7 +228,6 @@ _FLAG_UR = {
         "حالیہ فاسٹنگ ریڈنگز میں اتار چڑھاؤ یا ہدف سے زیادہ ہیں — احتیاط سے آگے بڑھیں۔",
     "No A1c or fasting readings provided — proceeding with a cautious plan. Consider sharing test results for a more accurate assessment.":
         "HbA1c یا فاسٹنگ ریڈنگز نہیں دی گئیں — احتیاطی منصوبے کے ساتھ آگے بڑھ رہے ہیں۔ بہتر جائزے کے لیے ٹیسٹ کے نتائج شامل کریں۔",
-    # Wizard unconfirmed flags
     "Diabetes status unconfirmed — please get a fasting blood sugar test.":
         "ذیابیطس کی تصدیق نہیں — براہ کرم فاسٹنگ بلڈ شوگر ٹیسٹ کروائیں۔",
     "Following a cautious low-GI plan until diagnosis is confirmed.":
@@ -552,7 +549,6 @@ if ss.get("setup_step") in (1,2):
                     st.rerun()
 
         else:
-            # ── Step 2 — fully bilingual ─────────────────────────────────────
             lg=_lang()
             _yn3   = ["No","Yes","Not sure"] if lg=="en" else ["نہیں","ہاں","یقین نہیں"]
             _yn3_en= ["No","Yes","Not sure"]
@@ -863,8 +859,12 @@ with tabs[1]:
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  TAB 2 — LOG SUGAR
-#  PKT fix: seed date/time defaults once from UTC+5; widget keys preserve the
-#  user's manual edits across reruns without re-evaluating datetime.now().
+#
+#  THE FIX: Never write to widget-bound session_state keys after widgets have
+#  rendered. Instead, we use a one-time init flag (gl_date_init).  After each
+#  successful save we pop that flag and call st.rerun(). On the next run the
+#  seeding block fires BEFORE st.date_input / st.time_input are created, so
+#  Streamlit is happy to accept the new values.
 # ══════════════════════════════════════════════════════════════════════════════
 with tabs[2]:
     st.markdown(f"## 📊 {t('glucose_heading')}")
@@ -872,7 +872,8 @@ with tabs[2]:
     if _blocked():
         st.error(t("blocked_msg"))
     else:
-        # Seed PKT defaults once per session
+        # Seed widget defaults once per session (or after each save rerun).
+        # Must happen BEFORE the widgets are instantiated below.
         if "gl_date_init" not in ss:
             _now_pkt = datetime.utcnow() + timedelta(hours=5)
             ss["glucose_log_date"] = _now_pkt.date()
@@ -882,8 +883,6 @@ with tabs[2]:
         c1,c2=st.columns(2)
         with c1:
             r_type=st.selectbox(t("reading_lbl"),t("reading_types"))
-            # No value= argument — Streamlit reads from session_state key,
-            # so the user's manual edits survive every rerun.
             m_date=st.date_input(t("date_lbl"), key="glucose_log_date")
             m_time=st.time_input(t("time_lbl"), key="glucose_log_time")
         with c2:
@@ -897,11 +896,14 @@ with tabs[2]:
             if st.button("Save Reading" if _lang()=="en" else "ریڈنگ محفوظ کریں",type="primary",use_container_width=True):
                 with st.spinner(t("saving_reading")):
                     add_glucose_log(user,datetime.combine(m_date,m_time),r_type,value,meal_note)
-                # Reset defaults to current PKT for the next entry
-                _now_pkt = datetime.utcnow() + timedelta(hours=5)
-                ss["glucose_log_date"] = _now_pkt.date()
-                ss["glucose_log_time"] = _now_pkt.time().replace(second=0, microsecond=0)
+                # ── THE KEY FIX ──────────────────────────────────────────────
+                # Drop the init flag so the seeding block above re-executes
+                # with fresh PKT time on the NEXT script run, before widgets
+                # are created. NEVER assign to widget-bound keys post-render.
+                ss.pop("gl_date_init", None)
                 st.success(t("reading_saved"))
+                st.rerun()   # triggers a clean re-run; seeding fires first
+
     st.markdown(f'<div class="footer">⚠️ {APP["disclaimer"]}</div>',unsafe_allow_html=True)
 
 
