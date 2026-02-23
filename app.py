@@ -930,7 +930,7 @@ with tabs[3]:
         rows=fetch_glucose_logs(user)
         if rows:
             df=pd.DataFrame(rows,columns=["measured_at","type","value","meal_note"])
-            df["measured_at"]=pd.to_datetime(df["measured_at"])
+            df["measured_at"]=pd.to_datetime(df["measured_at"], format="ISO8601")
             avg=df["value"].mean(); std=df["value"].std()
             hc=int((df["value"]>=TRIAGE["very_high"]).sum()); lc=int((df["value"]<TRIAGE["hypo"]).sum())
             m1,m2,m3=st.columns(3)
